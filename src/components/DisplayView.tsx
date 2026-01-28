@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Clock, CheckCircle, Check, Sparkles, Building2, Wifi } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Clock, CheckCircle, Check, Sparkles, Building2, Wifi, UserCheck, AlertCircle } from 'lucide-react';
 import type { Arrival } from '../lib/supabase';
 
 type DisplayViewProps = {
@@ -11,8 +11,28 @@ type DisplayViewProps = {
 export function DisplayView({ arrivals, currentTime, onCheckIn }: DisplayViewProps) {
   const [fontSize, setFontSize] = useState<'medium' | 'large' | 'xlarge'>('large');
 
-  const pendingArrivals = arrivals.filter(a => a.status === 'pending');
+  const pendingArrivals = arrivals.filter(a => a.status === 'pending' && !a.is_flagged);
   const checkedInCount = arrivals.filter(a => a.status === 'checked-in').length;
+  const justArrivedCount = pendingArrivals.filter(a => a.signed_in_at && !a.id_verified).length;
+
+  // Sort: signed-in guests (just arrived) at top, then by last name
+  const sortedPendingArrivals = useMemo(() => {
+    return [...pendingArrivals].sort((a, b) => {
+      // Priority 1: Signed in but not ID verified (just arrived) - at top
+      const aJustArrived = a.signed_in_at && !a.id_verified;
+      const bJustArrived = b.signed_in_at && !b.id_verified;
+      if (aJustArrived && !bJustArrived) return -1;
+      if (!aJustArrived && bJustArrived) return 1;
+      
+      // Within just arrived, sort by most recent first
+      if (aJustArrived && bJustArrived) {
+        return new Date(b.signed_in_at!).getTime() - new Date(a.signed_in_at!).getTime();
+      }
+      
+      // Then by last name
+      return a.last_name.localeCompare(b.last_name);
+    });
+  }, [pendingArrivals]);
 
   const sizes = {
     medium: { name: 'text-xl', unit: 'text-lg', row: 'py-3' },
@@ -63,12 +83,23 @@ export function DisplayView({ arrivals, currentTime, onCheckIn }: DisplayViewPro
       <div className="bg-slate-800/50 px-4 sm:px-8 py-3 sm:py-4 border-b border-white/5">
         <div className="flex flex-wrap justify-between items-center gap-3 sm:gap-4 max-w-7xl mx-auto">
           <div className="flex gap-4 sm:gap-8">
+            {justArrivedCount > 0 && (
+              <div className="flex items-center gap-2 sm:gap-3 animate-pulse">
+                <div className="p-1.5 sm:p-2 bg-orange-500/30 rounded-lg sm:rounded-xl border border-orange-500/50">
+                  <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-orange-400" />
+                </div>
+                <div>
+                  <span className="text-2xl sm:text-3xl font-bold text-orange-400">{justArrivedCount}</span>
+                  <span className="text-orange-300 ml-1 sm:ml-2 text-sm sm:text-base font-medium">Just Arrived</span>
+                </div>
+              </div>
+            )}
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="p-1.5 sm:p-2 bg-amber-500/20 rounded-lg sm:rounded-xl">
                 <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-amber-400" />
               </div>
               <div>
-                <span className="text-2xl sm:text-3xl font-bold text-amber-400">{pendingArrivals.length}</span>
+                <span className="text-2xl sm:text-3xl font-bold text-amber-400">{sortedPendingArrivals.length}</span>
                 <span className="text-slate-400 ml-1 sm:ml-2 text-sm sm:text-base font-medium">Pending</span>
               </div>
             </div>
@@ -103,7 +134,7 @@ export function DisplayView({ arrivals, currentTime, onCheckIn }: DisplayViewPro
 
       <main className="flex-1 overflow-auto px-4 sm:px-8 py-4 sm:py-6">
         <div className="max-w-7xl mx-auto">
-          {pendingArrivals.length === 0 ? (
+          {sortedPendingArrivals.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-[60vh] text-slate-400 px-4">
               <div className="p-4 sm:p-6 bg-emerald-500/10 rounded-2xl sm:rounded-3xl mb-4 sm:mb-6">
                 <Sparkles className="w-12 h-12 sm:w-20 sm:h-20 text-emerald-400" />
@@ -113,41 +144,57 @@ export function DisplayView({ arrivals, currentTime, onCheckIn }: DisplayViewPro
             </div>
           ) : (
             <div className="space-y-3">
-              {pendingArrivals.map((arrival, index) => (
-                <div
-                  key={arrival.id}
-                  className={`bg-gradient-to-r from-slate-800/80 to-slate-800/40 rounded-xl sm:rounded-2xl px-4 sm:px-6 ${size.row} border border-slate-700/50 hover:border-amber-500/30 hover:bg-slate-700/50 transition-all group backdrop-blur-sm`}
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-                    <div className="flex items-center gap-3 sm:gap-5 min-w-0">
-                      <span className="text-slate-500 font-mono text-base sm:text-lg w-8 sm:w-10 font-medium flex-shrink-0">
-                        {String(index + 1).padStart(2, '0')}
-                      </span>
-                      <span className={`${size.name} font-bold tracking-wide text-white truncate`}>
-                        {arrival.last_name}, {arrival.first_name || '—'}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 sm:gap-4 flex-wrap sm:flex-nowrap pl-11 sm:pl-0">
-                      {arrival.notes && (
-                        <span className="bg-slate-700/80 text-slate-300 px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium border border-slate-600/50 truncate max-w-[150px] sm:max-w-none">
-                          {arrival.notes}
+              {sortedPendingArrivals.map((arrival, index) => {
+                const isJustArrived = arrival.signed_in_at && !arrival.id_verified;
+                
+                return (
+                  <div
+                    key={arrival.id}
+                    className={`rounded-xl sm:rounded-2xl px-4 sm:px-6 ${size.row} transition-all group backdrop-blur-sm ${
+                      isJustArrived
+                        ? 'bg-gradient-to-r from-orange-600/30 to-orange-500/20 border-2 border-orange-500 animate-pulse shadow-lg shadow-orange-500/20'
+                        : 'bg-gradient-to-r from-slate-800/80 to-slate-800/40 border border-slate-700/50 hover:border-amber-500/30 hover:bg-slate-700/50'
+                    }`}
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                      <div className="flex items-center gap-3 sm:gap-5 min-w-0">
+                        <span className={`font-mono text-base sm:text-lg w-8 sm:w-10 font-medium flex-shrink-0 ${isJustArrived ? 'text-orange-400' : 'text-slate-500'}`}>
+                          {String(index + 1).padStart(2, '0')}
                         </span>
-                      )}
-                      <span className={`bg-gradient-to-r from-blue-600 to-blue-700 ${size.unit} font-mono font-bold px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-lg shadow-blue-500/20`}>
-                        {arrival.unit_number}
-                      </span>
-                      <button
-                        onClick={() => onCheckIn(arrival.id)}
-                        className="sm:opacity-0 sm:group-hover:opacity-100 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-semibold hover:from-emerald-600 hover:to-emerald-700 transition-all flex items-center gap-2 shadow-lg shadow-emerald-500/30 text-sm sm:text-base"
-                      >
-                        <Check className="w-4 h-4 sm:w-5 sm:h-5" />
-                        <span className="hidden sm:inline">Check In</span>
-                        <span className="sm:hidden">Check In</span>
-                      </button>
+                        <span className={`${size.name} font-bold tracking-wide text-white truncate`}>
+                          {arrival.last_name}, {arrival.first_name || '—'}
+                        </span>
+                        {isJustArrived && (
+                          <span className="bg-orange-500 text-white px-3 py-1 rounded-lg text-sm font-bold flex items-center gap-1.5 animate-bounce">
+                            <UserCheck className="w-4 h-4" />
+                            JUST ARRIVED
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 sm:gap-4 flex-wrap sm:flex-nowrap pl-11 sm:pl-0">
+                        {arrival.notes && (
+                          <span className="bg-slate-700/80 text-slate-300 px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium border border-slate-600/50 truncate max-w-[150px] sm:max-w-none">
+                            {arrival.notes}
+                          </span>
+                        )}
+                        <span className={`bg-gradient-to-r from-blue-600 to-blue-700 ${size.unit} font-mono font-bold px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-lg shadow-blue-500/20`}>
+                          {arrival.unit_number}
+                        </span>
+                        <button
+                          onClick={() => onCheckIn(arrival.id)}
+                          className={`bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-semibold hover:from-emerald-600 hover:to-emerald-700 transition-all flex items-center gap-2 shadow-lg shadow-emerald-500/30 text-sm sm:text-base ${
+                            isJustArrived ? 'opacity-100' : 'sm:opacity-0 sm:group-hover:opacity-100'
+                          }`}
+                        >
+                          <Check className="w-4 h-4 sm:w-5 sm:h-5" />
+                          <span className="hidden sm:inline">Check In</span>
+                          <span className="sm:hidden">Check In</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
