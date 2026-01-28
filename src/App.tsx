@@ -217,6 +217,7 @@ function App() {
   }): Promise<{ success: boolean; message: string }> => {
     const today = getLocalDateString();
     const normalizedLastName = guestInfo.lastName.trim().toUpperCase();
+    const normalizedFirstName = guestInfo.firstName.trim().toUpperCase();
     
     // Find matching arrivals by last name (case-insensitive)
     const { data: matchingArrivals, error: fetchError } = await supabase
@@ -231,34 +232,56 @@ function App() {
       return { success: false, message: 'Unable to process sign-in. Please see front desk.' };
     }
 
-    if (!matchingArrivals || matchingArrivals.length === 0) {
+    // If matching arrival found, update it
+    if (matchingArrivals && matchingArrivals.length > 0) {
+      const arrivalToUpdate = matchingArrivals[0];
+      const { error: updateError } = await supabase
+        .from('arrivals')
+        .update({
+          guest_phone: guestInfo.phone,
+          guest_email: guestInfo.email,
+          signed_in_at: new Date().toISOString(),
+          rules_accepted: true,
+        })
+        .eq('id', arrivalToUpdate.id);
+
+      if (updateError) {
+        console.error('Error updating arrival:', updateError);
+        return { success: false, message: 'Unable to complete sign-in. Please see front desk.' };
+      }
+
+      await fetchArrivals();
       return { 
-        success: false, 
-        message: `No reservation found for "${guestInfo.lastName}". Please see front desk for assistance.` 
+        success: true, 
+        message: `Welcome, ${guestInfo.firstName}! Your unit is ${arrivalToUpdate.unit_number}.` 
       };
     }
 
-    // Update the first matching arrival with guest info
-    const arrivalToUpdate = matchingArrivals[0];
-    const { error: updateError } = await supabase
+    // No matching arrival - create a walk-in record
+    const { error: insertError } = await supabase
       .from('arrivals')
-      .update({
+      .insert([{
+        last_name: normalizedLastName,
+        first_name: normalizedFirstName,
+        unit_number: '',  // No unit assigned yet
+        notes: 'WALK-IN',
+        status: 'pending',
+        arrival_date: today,
         guest_phone: guestInfo.phone,
         guest_email: guestInfo.email,
         signed_in_at: new Date().toISOString(),
         rules_accepted: true,
-      })
-      .eq('id', arrivalToUpdate.id);
+      }]);
 
-    if (updateError) {
-      console.error('Error updating arrival:', updateError);
+    if (insertError) {
+      console.error('Error creating walk-in:', insertError);
       return { success: false, message: 'Unable to complete sign-in. Please see front desk.' };
     }
 
     await fetchArrivals();
     return { 
       success: true, 
-      message: `Welcome, ${guestInfo.firstName}! Your unit is ${arrivalToUpdate.unit_number}.` 
+      message: `Thank you, ${guestInfo.firstName}! Please see front desk for unit assignment.` 
     };
   };
 

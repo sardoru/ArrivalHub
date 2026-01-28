@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Upload, Trash2, Edit3, X, Package, Calendar, Users, CheckCircle, Clock, XCircle, Shield, Phone, Mail, AlertCircle, Flag, Ban, FileDown, Download } from 'lucide-react';
+import { Plus, Upload, Trash2, Edit3, X, Package, Calendar, Users, CheckCircle, Clock, XCircle, Shield, Phone, Mail, AlertCircle, Flag, Ban, FileDown, Download, UserPlus } from 'lucide-react';
 import { supabase, type Arrival } from '../lib/supabase';
 
 type AdminPanelProps = {
@@ -112,6 +112,7 @@ export function AdminPanel({
   const noShowCount = arrivals.filter(a => a.status === 'no-show').length;
   const awaitingIdCount = arrivals.filter(a => a.signed_in_at && !a.id_verified && a.status === 'pending' && !a.is_flagged).length;
   const flaggedCount = arrivals.filter(a => a.is_flagged).length;
+  const walkInCount = arrivals.filter(a => !a.unit_number).length;
 
   const handleOpenFlagModal = (arrival: Arrival) => {
     setFlaggingArrival(arrival);
@@ -240,12 +241,18 @@ export function AdminPanel({
     setReportData(null);
   };
 
-  // Sort arrivals: flagged at top, then signed-in awaiting ID, then by last name
+  // Sort arrivals: flagged at top, then walk-ins needing unit, then signed-in awaiting ID, then by last name
   const sortedArrivals = useMemo(() => {
     return [...arrivals].sort((a, b) => {
       // Priority 0: Flagged guests at very top
       if (a.is_flagged && !b.is_flagged) return -1;
       if (!a.is_flagged && b.is_flagged) return 1;
+
+      // Priority 0.5: Walk-ins needing unit assignment (no unit_number)
+      const aWalkIn = !a.unit_number && a.signed_in_at && a.status === 'pending' && !a.is_flagged;
+      const bWalkIn = !b.unit_number && b.signed_in_at && b.status === 'pending' && !b.is_flagged;
+      if (aWalkIn && !bWalkIn) return -1;
+      if (!aWalkIn && bWalkIn) return 1;
 
       // Priority 1: Signed in but not ID verified (awaiting ID check)
       const aAwaitingId = a.signed_in_at && !a.id_verified && a.status === 'pending' && !a.is_flagged;
@@ -313,6 +320,15 @@ export function AdminPanel({
                   <span className="text-xl sm:text-2xl font-bold text-red-700">{flaggedCount}</span>
                 </div>
                 <div className="text-xs text-red-600 font-medium mt-1">Flagged</div>
+              </div>
+            )}
+            {walkInCount > 0 && (
+              <div className="bg-purple-50 border-2 border-purple-400 px-3 sm:px-5 py-3 rounded-xl text-center">
+                <div className="flex items-center justify-center gap-1.5 sm:gap-2">
+                  <UserPlus className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
+                  <span className="text-xl sm:text-2xl font-bold text-purple-700">{walkInCount}</span>
+                </div>
+                <div className="text-xs text-purple-600 font-medium mt-1">Walk-Ins</div>
               </div>
             )}
             {awaitingIdCount > 0 && (
@@ -516,6 +532,7 @@ export function AdminPanel({
                     const isAwaitingId = arrival.signed_in_at && !arrival.id_verified && arrival.status === 'pending' && !arrival.is_flagged;
                     const isIdVerified = arrival.signed_in_at && arrival.id_verified && arrival.status === 'pending' && !arrival.is_flagged;
                     const isFlagged = arrival.is_flagged;
+                    const isWalkIn = !arrival.unit_number && arrival.signed_in_at;
                     
                     return (
                       <div
@@ -523,6 +540,8 @@ export function AdminPanel({
                         className={`px-6 py-4 transition-all ${
                           isFlagged
                             ? 'bg-gradient-to-r from-red-100 to-red-50 border-l-4 border-red-600'
+                            : isWalkIn && arrival.status === 'pending'
+                            ? 'bg-gradient-to-r from-purple-100 to-purple-50 border-l-4 border-purple-500 animate-pulse'
                             : isAwaitingId 
                             ? 'bg-gradient-to-r from-orange-100 to-amber-50 border-l-4 border-orange-500 animate-pulse' 
                             : isIdVerified
@@ -540,9 +559,39 @@ export function AdminPanel({
                               <span className="text-lg font-bold text-slate-800">
                                 {arrival.last_name}, {arrival.first_name || '—'}
                               </span>
-                              <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-lg text-lg font-mono font-bold">
-                                {arrival.unit_number}
-                              </span>
+                              {isWalkIn ? (
+                                <div className="flex items-center gap-2">
+                                  <span className="bg-purple-600 text-white px-3 py-1 rounded-lg text-sm font-bold flex items-center gap-1.5">
+                                    <UserPlus className="w-4 h-4" />
+                                    WALK-IN
+                                  </span>
+                                  <div className="flex items-center gap-1">
+                                    <input
+                                      type="text"
+                                      placeholder="Unit #"
+                                      className="w-24 px-3 py-1 text-lg font-mono font-bold border-2 border-purple-400 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none"
+                                      onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                          const input = e.target as HTMLInputElement;
+                                          if (input.value.trim()) {
+                                            onUpdate(arrival.id, { unit_number: input.value.trim() });
+                                          }
+                                        }
+                                      }}
+                                      onBlur={(e) => {
+                                        if (e.target.value.trim()) {
+                                          onUpdate(arrival.id, { unit_number: e.target.value.trim() });
+                                        }
+                                      }}
+                                    />
+                                    <span className="text-xs text-purple-600 font-medium">Enter to assign</span>
+                                  </div>
+                                </div>
+                              ) : (
+                                <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-lg text-lg font-mono font-bold">
+                                  {arrival.unit_number}
+                                </span>
+                              )}
                               {isFlagged && (
                                 <span className="bg-red-600 text-white px-3 py-1 rounded-lg text-sm font-bold flex items-center gap-1.5">
                                   <Ban className="w-4 h-4" />

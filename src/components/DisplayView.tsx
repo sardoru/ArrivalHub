@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Clock, CheckCircle, Check, Sparkles, Building2, Wifi, UserCheck, AlertCircle } from 'lucide-react';
+import { Clock, CheckCircle, Check, Sparkles, Building2, Wifi, UserCheck, AlertCircle, UserPlus } from 'lucide-react';
 import type { Arrival } from '../lib/supabase';
 
 type DisplayViewProps = {
@@ -14,10 +14,17 @@ export function DisplayView({ arrivals, currentTime, onCheckIn }: DisplayViewPro
   const pendingArrivals = arrivals.filter(a => a.status === 'pending' && !a.is_flagged);
   const checkedInCount = arrivals.filter(a => a.status === 'checked-in').length;
   const justArrivedCount = pendingArrivals.filter(a => a.signed_in_at && !a.id_verified).length;
+  const walkInCount = pendingArrivals.filter(a => !a.unit_number && a.signed_in_at).length;
 
-  // Sort: signed-in guests (just arrived) at top, then by last name
+  // Sort: walk-ins needing unit first, then signed-in guests, then by last name
   const sortedPendingArrivals = useMemo(() => {
     return [...pendingArrivals].sort((a, b) => {
+      // Priority 0: Walk-ins needing unit assignment at very top
+      const aWalkIn = !a.unit_number && a.signed_in_at;
+      const bWalkIn = !b.unit_number && b.signed_in_at;
+      if (aWalkIn && !bWalkIn) return -1;
+      if (!aWalkIn && bWalkIn) return 1;
+      
       // Priority 1: Signed in but not ID verified (just arrived) - at top
       const aJustArrived = a.signed_in_at && !a.id_verified;
       const bJustArrived = b.signed_in_at && !b.id_verified;
@@ -83,6 +90,17 @@ export function DisplayView({ arrivals, currentTime, onCheckIn }: DisplayViewPro
       <div className="bg-slate-800/50 px-4 sm:px-8 py-3 sm:py-4 border-b border-white/5">
         <div className="flex flex-wrap justify-between items-center gap-3 sm:gap-4 max-w-7xl mx-auto">
           <div className="flex gap-4 sm:gap-8">
+            {walkInCount > 0 && (
+              <div className="flex items-center gap-2 sm:gap-3 animate-pulse">
+                <div className="p-1.5 sm:p-2 bg-purple-500/30 rounded-lg sm:rounded-xl border border-purple-500/50">
+                  <UserPlus className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
+                </div>
+                <div>
+                  <span className="text-2xl sm:text-3xl font-bold text-purple-400">{walkInCount}</span>
+                  <span className="text-purple-300 ml-1 sm:ml-2 text-sm sm:text-base font-medium">Walk-Ins</span>
+                </div>
+              </div>
+            )}
             {justArrivedCount > 0 && (
               <div className="flex items-center gap-2 sm:gap-3 animate-pulse">
                 <div className="p-1.5 sm:p-2 bg-orange-500/30 rounded-lg sm:rounded-xl border border-orange-500/50">
@@ -146,25 +164,34 @@ export function DisplayView({ arrivals, currentTime, onCheckIn }: DisplayViewPro
             <div className="space-y-3">
               {sortedPendingArrivals.map((arrival, index) => {
                 const isJustArrived = arrival.signed_in_at && !arrival.id_verified;
+                const isWalkIn = !arrival.unit_number && arrival.signed_in_at;
                 
                 return (
                   <div
                     key={arrival.id}
                     className={`rounded-xl sm:rounded-2xl px-4 sm:px-6 ${size.row} transition-all group backdrop-blur-sm ${
-                      isJustArrived
+                      isWalkIn
+                        ? 'bg-gradient-to-r from-purple-600/30 to-purple-500/20 border-2 border-purple-500 animate-pulse shadow-lg shadow-purple-500/20'
+                        : isJustArrived
                         ? 'bg-gradient-to-r from-orange-600/30 to-orange-500/20 border-2 border-orange-500 animate-pulse shadow-lg shadow-orange-500/20'
                         : 'bg-gradient-to-r from-slate-800/80 to-slate-800/40 border border-slate-700/50 hover:border-amber-500/30 hover:bg-slate-700/50'
                     }`}
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                       <div className="flex items-center gap-3 sm:gap-5 min-w-0">
-                        <span className={`font-mono text-base sm:text-lg w-8 sm:w-10 font-medium flex-shrink-0 ${isJustArrived ? 'text-orange-400' : 'text-slate-500'}`}>
+                        <span className={`font-mono text-base sm:text-lg w-8 sm:w-10 font-medium flex-shrink-0 ${isWalkIn ? 'text-purple-400' : isJustArrived ? 'text-orange-400' : 'text-slate-500'}`}>
                           {String(index + 1).padStart(2, '0')}
                         </span>
                         <span className={`${size.name} font-bold tracking-wide text-white truncate`}>
                           {arrival.last_name}, {arrival.first_name || '—'}
                         </span>
-                        {isJustArrived && (
+                        {isWalkIn && (
+                          <span className="bg-purple-500 text-white px-3 py-1 rounded-lg text-sm font-bold flex items-center gap-1.5 animate-bounce">
+                            <UserPlus className="w-4 h-4" />
+                            WALK-IN
+                          </span>
+                        )}
+                        {isJustArrived && !isWalkIn && (
                           <span className="bg-orange-500 text-white px-3 py-1 rounded-lg text-sm font-bold flex items-center gap-1.5 animate-bounce">
                             <UserCheck className="w-4 h-4" />
                             JUST ARRIVED
@@ -172,14 +199,20 @@ export function DisplayView({ arrivals, currentTime, onCheckIn }: DisplayViewPro
                         )}
                       </div>
                       <div className="flex items-center gap-2 sm:gap-4 flex-wrap sm:flex-nowrap pl-11 sm:pl-0">
-                        {arrival.notes && (
+                        {arrival.notes && arrival.notes !== 'WALK-IN' && (
                           <span className="bg-slate-700/80 text-slate-300 px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium border border-slate-600/50 truncate max-w-[150px] sm:max-w-none">
                             {arrival.notes}
                           </span>
                         )}
-                        <span className={`bg-gradient-to-r from-blue-600 to-blue-700 ${size.unit} font-mono font-bold px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-lg shadow-blue-500/20`}>
-                          {arrival.unit_number}
-                        </span>
+                        {isWalkIn ? (
+                          <span className={`bg-gradient-to-r from-purple-600 to-purple-700 ${size.unit} font-bold px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-lg shadow-purple-500/20`}>
+                            See Front Desk
+                          </span>
+                        ) : (
+                          <span className={`bg-gradient-to-r from-blue-600 to-blue-700 ${size.unit} font-mono font-bold px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-lg shadow-blue-500/20`}>
+                            {arrival.unit_number}
+                          </span>
+                        )}
                         <button
                           onClick={() => onCheckIn(arrival.id)}
                           className={`bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-semibold hover:from-emerald-600 hover:to-emerald-700 transition-all flex items-center gap-2 shadow-lg shadow-emerald-500/30 text-sm sm:text-base ${
