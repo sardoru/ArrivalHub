@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #213547;
+  background-color: #f8fafc;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+@layer components {
+  .demand-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .demand-low {
+    @apply bg-green-100 text-green-800;
+  }
+
+  .demand-moderate {
+    @apply bg-yellow-100 text-yellow-800;
+  }
+
+  .demand-high {
+    @apply bg-orange-100 text-orange-800;
+  }
+
+  .demand-very-high {
+    @apply bg-red-100 text-red-800;
+  }
+
+  .demand-extreme {
+    @apply bg-red-200 text-red-900;
+  }
+}

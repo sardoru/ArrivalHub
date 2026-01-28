@@ -1,0 +1,22 @@
+{
+  "name": "memphis-events-dashboard",
+  "version": "1.0.0",
+  "description": "Dashboard for Memphis events and STR pricing recommendations",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install && cd server && npm install && cd ../client && npm install",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "build": "cd client && npm run build",
+    "start": "cd server && npm start",
+    "db:start": "docker-compose up -d",
+    "db:stop": "docker-compose down",
+    "db:migrate": "cd server && npm run migrate",
+    "db:seed": "docker exec -i memphis_events_db psql -U memphis -d memphis_events < database/seeds/001_sample_data.sql",
+    "sync": "cd server && npm run sync"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
