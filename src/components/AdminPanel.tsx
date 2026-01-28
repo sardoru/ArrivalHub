@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Upload, Trash2, Edit3, X, Package, Calendar, Users, CheckCircle, Clock, XCircle, Shield, Phone, Mail, AlertCircle, Flag, Ban } from 'lucide-react';
-import type { Arrival } from '../lib/supabase';
+import { Plus, Upload, Trash2, Edit3, X, Package, Calendar, Users, CheckCircle, Clock, XCircle, Shield, Phone, Mail, AlertCircle, Flag, Ban, FileDown, Download } from 'lucide-react';
+import { supabase, type Arrival } from '../lib/supabase';
 
 type AdminPanelProps = {
   arrivals: Arrival[];
@@ -31,6 +31,17 @@ export function AdminPanel({
   const [showFlagModal, setShowFlagModal] = useState(false);
   const [flaggingArrival, setFlaggingArrival] = useState<Arrival | null>(null);
   const [flagReason, setFlagReason] = useState('');
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportStartDate, setReportStartDate] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  });
+  const [reportEndDate, setReportEndDate] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  });
+  const [reportData, setReportData] = useState<Arrival[] | null>(null);
+  const [isLoadingReport, setIsLoadingReport] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,6 +133,111 @@ export function AdminPanel({
 
   const handleClearFlag = (arrivalId: string) => {
     onUpdate(arrivalId, { is_flagged: false, flag_reason: '' });
+  };
+
+  const handleGenerateReport = async () => {
+    setIsLoadingReport(true);
+    try {
+      const { data, error } = await supabase
+        .from('arrivals')
+        .select('*')
+        .gte('arrival_date', reportStartDate)
+        .lte('arrival_date', reportEndDate)
+        .order('arrival_date', { ascending: true })
+        .order('last_name', { ascending: true });
+      
+      if (error) throw error;
+      setReportData(data || []);
+    } catch (err) {
+      console.error('Error fetching report data:', err);
+      alert('Failed to load report data. Please try again.');
+    } finally {
+      setIsLoadingReport(false);
+    }
+  };
+
+  const reportStats = useMemo(() => {
+    if (!reportData) return null;
+    return {
+      total: reportData.length,
+      checkedIn: reportData.filter(a => a.status === 'checked-in').length,
+      noShow: reportData.filter(a => a.status === 'no-show').length,
+      pending: reportData.filter(a => a.status === 'pending').length,
+      denied: reportData.filter(a => a.is_flagged).length,
+      selfSignedIn: reportData.filter(a => a.signed_in_at).length,
+    };
+  }, [reportData]);
+
+  const handleExportCSV = () => {
+    if (!reportData || reportData.length === 0) return;
+
+    const headers = [
+      'Date',
+      'Last Name',
+      'First Name',
+      'Unit',
+      'Status',
+      'Notes',
+      'Guest Phone',
+      'Guest Email',
+      'Self Signed-In',
+      'Signed-In Time',
+      'ID Verified',
+      'Flagged',
+      'Flag Reason'
+    ];
+
+    const rows = reportData.map(a => [
+      a.arrival_date,
+      a.last_name,
+      a.first_name || '',
+      a.unit_number,
+      a.is_flagged ? 'DENIED' : a.status.toUpperCase(),
+      a.notes || '',
+      a.guest_phone || '',
+      a.guest_email || '',
+      a.signed_in_at ? 'Yes' : 'No',
+      a.signed_in_at ? new Date(a.signed_in_at).toLocaleString() : '',
+      a.id_verified ? 'Yes' : 'No',
+      a.is_flagged ? 'Yes' : 'No',
+      a.flag_reason || ''
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    ].join('\n');
+
+    // Add summary at the end
+    const summaryLines = [
+      '',
+      '',
+      'SUMMARY REPORT',
+      `Date Range,${reportStartDate} to ${reportEndDate}`,
+      `Total Scheduled,${reportStats?.total || 0}`,
+      `Checked In,${reportStats?.checkedIn || 0}`,
+      `No Shows,${reportStats?.noShow || 0}`,
+      `Pending,${reportStats?.pending || 0}`,
+      `Denied Access,${reportStats?.denied || 0}`,
+      `Self Signed-In (Kiosk),${reportStats?.selfSignedIn || 0}`
+    ];
+
+    const fullCSV = csvContent + '\n' + summaryLines.join('\n');
+
+    const blob = new Blob([fullCSV], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `arrivals-report-${reportStartDate}-to-${reportEndDate}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleCloseReportModal = () => {
+    setShowReportModal(false);
+    setReportData(null);
   };
 
   // Sort arrivals: flagged at top, then signed-in awaiting ID, then by last name
@@ -365,6 +481,17 @@ export function AdminPanel({
                   Clear All
                 </button>
               </div>
+
+              <hr className="my-6 border-slate-200" />
+
+              <button
+                type="button"
+                onClick={() => setShowReportModal(true)}
+                className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 text-white py-3 rounded-xl font-semibold hover:from-indigo-700 hover:to-indigo-800 transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25"
+              >
+                <FileDown className="w-5 h-5" />
+                Export Reports
+              </button>
             </div>
           </div>
 
@@ -685,6 +812,224 @@ export function AdminPanel({
                 className="px-6 bg-slate-200 text-slate-700 py-3 rounded-xl font-semibold hover:bg-slate-300 transition-all"
               >
                 Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showReportModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+              <FileDown className="w-6 h-6 text-indigo-600" />
+              Export Activity Report
+            </h3>
+            
+            {/* Date Range Selection */}
+            <div className="bg-slate-50 rounded-xl p-4 mb-6">
+              <p className="text-sm text-slate-600 font-medium mb-3">Select Date Range</p>
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                <div className="flex-1 w-full">
+                  <label className="block text-xs text-slate-500 mb-1">Start Date</label>
+                  <input
+                    type="date"
+                    value={reportStartDate}
+                    onChange={(e) => setReportStartDate(e.target.value)}
+                    className="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"
+                  />
+                </div>
+                <span className="text-slate-400 hidden sm:block">to</span>
+                <div className="flex-1 w-full">
+                  <label className="block text-xs text-slate-500 mb-1">End Date</label>
+                  <input
+                    type="date"
+                    value={reportEndDate}
+                    onChange={(e) => setReportEndDate(e.target.value)}
+                    className="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleGenerateReport}
+                  disabled={isLoadingReport}
+                  className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition-all disabled:opacity-50 mt-4 sm:mt-5 w-full sm:w-auto"
+                >
+                  {isLoadingReport ? 'Loading...' : 'Generate'}
+                </button>
+              </div>
+              
+              {/* Quick date presets */}
+              <div className="flex flex-wrap gap-2 mt-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const today = new Date().toISOString().split('T')[0];
+                    setReportStartDate(today);
+                    setReportEndDate(today);
+                  }}
+                  className="text-xs bg-white border border-slate-300 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-100"
+                >
+                  Today
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const today = new Date();
+                    const yesterday = new Date(today);
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    setReportStartDate(yesterday.toISOString().split('T')[0]);
+                    setReportEndDate(yesterday.toISOString().split('T')[0]);
+                  }}
+                  className="text-xs bg-white border border-slate-300 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-100"
+                >
+                  Yesterday
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const today = new Date();
+                    const weekAgo = new Date(today);
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    setReportStartDate(weekAgo.toISOString().split('T')[0]);
+                    setReportEndDate(today.toISOString().split('T')[0]);
+                  }}
+                  className="text-xs bg-white border border-slate-300 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-100"
+                >
+                  Last 7 Days
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const today = new Date();
+                    const monthAgo = new Date(today);
+                    monthAgo.setDate(monthAgo.getDate() - 30);
+                    setReportStartDate(monthAgo.toISOString().split('T')[0]);
+                    setReportEndDate(today.toISOString().split('T')[0]);
+                  }}
+                  className="text-xs bg-white border border-slate-300 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-100"
+                >
+                  Last 30 Days
+                </button>
+              </div>
+            </div>
+
+            {/* Report Results */}
+            {reportData && (
+              <>
+                <div className="mb-6">
+                  <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    Report Summary: {reportStartDate === reportEndDate 
+                      ? new Date(reportStartDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
+                      : `${new Date(reportStartDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(reportEndDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+                    }
+                  </h4>
+                  
+                  {reportStats && (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      <div className="bg-slate-100 rounded-xl p-4 text-center">
+                        <div className="text-2xl font-bold text-slate-700">{reportStats.total}</div>
+                        <div className="text-xs text-slate-500 font-medium">Scheduled</div>
+                      </div>
+                      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center">
+                        <div className="text-2xl font-bold text-emerald-700">{reportStats.checkedIn}</div>
+                        <div className="text-xs text-emerald-600 font-medium">Checked In</div>
+                      </div>
+                      <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
+                        <div className="text-2xl font-bold text-red-600">{reportStats.noShow}</div>
+                        <div className="text-xs text-red-500 font-medium">No Shows</div>
+                      </div>
+                      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
+                        <div className="text-2xl font-bold text-amber-700">{reportStats.pending}</div>
+                        <div className="text-xs text-amber-600 font-medium">Pending</div>
+                      </div>
+                      <div className="bg-red-100 border border-red-300 rounded-xl p-4 text-center">
+                        <div className="text-2xl font-bold text-red-700">{reportStats.denied}</div>
+                        <div className="text-xs text-red-600 font-medium">Denied Access</div>
+                      </div>
+                      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
+                        <div className="text-2xl font-bold text-blue-700">{reportStats.selfSignedIn}</div>
+                        <div className="text-xs text-blue-600 font-medium">Self Sign-Ins</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Detailed List Preview */}
+                {reportData.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="text-sm font-semibold text-slate-700 mb-2">Preview ({reportData.length} records)</h4>
+                    <div className="bg-slate-50 rounded-xl border border-slate-200 max-h-48 overflow-y-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-slate-100 sticky top-0">
+                          <tr>
+                            <th className="text-left px-3 py-2 text-slate-600 font-semibold">Date</th>
+                            <th className="text-left px-3 py-2 text-slate-600 font-semibold">Name</th>
+                            <th className="text-left px-3 py-2 text-slate-600 font-semibold">Unit</th>
+                            <th className="text-left px-3 py-2 text-slate-600 font-semibold">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-200">
+                          {reportData.slice(0, 20).map((arrival) => (
+                            <tr key={arrival.id} className="hover:bg-white">
+                              <td className="px-3 py-2 text-slate-600">{arrival.arrival_date}</td>
+                              <td className="px-3 py-2 text-slate-800 font-medium">
+                                {arrival.last_name}, {arrival.first_name || '—'}
+                              </td>
+                              <td className="px-3 py-2 text-slate-600 font-mono">{arrival.unit_number}</td>
+                              <td className="px-3 py-2">
+                                <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                                  arrival.is_flagged 
+                                    ? 'bg-red-100 text-red-700'
+                                    : arrival.status === 'checked-in' 
+                                    ? 'bg-emerald-100 text-emerald-700'
+                                    : arrival.status === 'no-show'
+                                    ? 'bg-red-100 text-red-600'
+                                    : 'bg-amber-100 text-amber-700'
+                                }`}>
+                                  {arrival.is_flagged ? 'DENIED' : arrival.status.toUpperCase()}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                      {reportData.length > 20 && (
+                        <div className="text-center py-2 text-sm text-slate-500 bg-slate-100">
+                          ... and {reportData.length - 20} more records
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {reportData.length === 0 && (
+                  <div className="text-center py-8 text-slate-500">
+                    <Calendar className="w-12 h-12 mx-auto mb-2 opacity-30" />
+                    <p>No arrivals found for this date range</p>
+                  </div>
+                )}
+              </>
+            )}
+
+            <div className="flex gap-3 mt-4">
+              {reportData && reportData.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleExportCSV}
+                  className="flex-1 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white py-3 rounded-xl font-semibold hover:from-indigo-700 hover:to-indigo-800 transition-all shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2"
+                >
+                  <Download className="w-5 h-5" />
+                  Download CSV
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={handleCloseReportModal}
+                className={`${reportData && reportData.length > 0 ? 'px-6' : 'flex-1'} bg-slate-200 text-slate-700 py-3 rounded-xl font-semibold hover:bg-slate-300 transition-all`}
+              >
+                Close
               </button>
             </div>
           </div>
