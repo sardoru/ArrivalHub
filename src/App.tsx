@@ -386,51 +386,62 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-100">
-      <div className="bg-slate-900 text-white px-4 py-2 flex justify-between items-center">
-        <button
-          onClick={handleLogout}
-          className="px-3 py-2 rounded-xl font-medium transition-all bg-slate-800 hover:bg-red-600 flex items-center gap-2 text-sm"
-          title="Logout"
-        >
-          <LogOut className="w-4 h-4" />
-          <span className="hidden sm:inline">Logout</span>
-        </button>
-        <div className="flex gap-2">
-        <button
-          onClick={() => setView('admin')}
-          className={`px-6 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2 ${
-            view === 'admin'
-              ? 'bg-blue-600 shadow-lg shadow-blue-500/30'
-              : 'bg-slate-800 hover:bg-slate-700'
-          }`}
-        >
-          <Settings className="w-5 h-5" />
-          Admin Panel
-        </button>
-        <button
-          onClick={() => setView('display')}
-          className={`px-6 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2 ${
-            view === 'display'
-              ? 'bg-emerald-600 shadow-lg shadow-emerald-500/30'
-              : 'bg-slate-800 hover:bg-slate-700'
-          }`}
-        >
-          <Monitor className="w-5 h-5" />
-          Display View
-        </button>
-        <button
-          onClick={() => setView('guest')}
-          className={`px-6 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2 ${
-            view === 'guest'
-              ? 'bg-amber-600 shadow-lg shadow-amber-500/30'
-              : 'bg-slate-800 hover:bg-slate-700'
-          }`}
-        >
-          <Tablet className="w-5 h-5" />
-          Guest Sign-In
-        </button>
+      {/* Mobile-optimized navigation */}
+      <div className="bg-slate-900 text-white px-2 sm:px-4 py-2">
+        <div className="flex items-center justify-between gap-2">
+          {/* Logout button */}
+          <button
+            onClick={handleLogout}
+            className="p-2 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl font-medium transition-all bg-slate-800 hover:bg-red-600 flex items-center gap-2 text-sm flex-shrink-0"
+            title="Logout"
+          >
+            <LogOut className="w-4 h-4" />
+            <span className="hidden sm:inline">Logout</span>
+          </button>
+          
+          {/* Navigation buttons */}
+          <div className="flex gap-1 sm:gap-2 flex-1 justify-center">
+            <button
+              onClick={() => setView('admin')}
+              className={`px-2 sm:px-4 md:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-semibold transition-all flex items-center gap-1 sm:gap-2 text-xs sm:text-sm md:text-base ${
+                view === 'admin'
+                  ? 'bg-blue-600 shadow-lg shadow-blue-500/30'
+                  : 'bg-slate-800 hover:bg-slate-700'
+              }`}
+            >
+              <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden xs:inline sm:inline">Admin</span>
+              <span className="hidden md:inline"> Panel</span>
+            </button>
+            <button
+              onClick={() => setView('display')}
+              className={`px-2 sm:px-4 md:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-semibold transition-all flex items-center gap-1 sm:gap-2 text-xs sm:text-sm md:text-base ${
+                view === 'display'
+                  ? 'bg-emerald-600 shadow-lg shadow-emerald-500/30'
+                  : 'bg-slate-800 hover:bg-slate-700'
+              }`}
+            >
+              <Monitor className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden xs:inline sm:inline">Display</span>
+              <span className="hidden md:inline"> View</span>
+            </button>
+            <button
+              onClick={() => setView('guest')}
+              className={`px-2 sm:px-4 md:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-semibold transition-all flex items-center gap-1 sm:gap-2 text-xs sm:text-sm md:text-base ${
+                view === 'guest'
+                  ? 'bg-amber-600 shadow-lg shadow-amber-500/30'
+                  : 'bg-slate-800 hover:bg-slate-700'
+              }`}
+            >
+              <Tablet className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden xs:inline sm:inline">Guest</span>
+              <span className="hidden md:inline"> Sign-In</span>
+            </button>
+          </div>
+          
+          {/* Spacer for balance */}
+          <div className="w-8 sm:w-12 flex-shrink-0"></div>
         </div>
-        <div className="w-20 hidden sm:block"></div>
       </div>
 
       {view === 'admin' && (

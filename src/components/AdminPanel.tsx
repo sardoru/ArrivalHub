@@ -286,20 +286,20 @@ export function AdminPanel({
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <header className="bg-gradient-to-r from-slate-800 to-slate-900 text-white shadow-xl">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/10 rounded-xl">
-              <Users className="w-8 h-8" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="p-1.5 sm:p-2 bg-white/10 rounded-lg sm:rounded-xl">
+              <Users className="w-6 h-6 sm:w-8 sm:h-8" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Arrivals Management</h1>
-              <p className="text-slate-300 text-sm">Front Desk Administration Panel</p>
+              <h1 className="text-lg sm:text-2xl font-bold tracking-tight">Arrivals Management</h1>
+              <p className="text-slate-300 text-xs sm:text-sm">Front Desk Administration Panel</p>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6 mb-8">
           <div className="flex items-center gap-3 mb-4">
             <Calendar className="w-5 h-5 text-slate-400" />
@@ -368,10 +368,10 @@ export function AdminPanel({
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-              <h2 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
+        <div className="grid lg:grid-cols-3 gap-4 sm:gap-8">
+          <div className="lg:col-span-1 order-2 lg:order-1">
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6">
+              <h2 className="text-base sm:text-lg font-bold text-slate-800 mb-4 sm:mb-6 flex items-center gap-2">
                 {editingId ? (
                   <>
                     <Edit3 className="w-5 h-5 text-blue-600" />
@@ -386,73 +386,78 @@ export function AdminPanel({
               </h2>
 
               <form onSubmit={handleSubmit}>
-                <div className="space-y-5">
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Last Name <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      className="w-full border border-slate-300 rounded-xl px-4 py-3 text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                      placeholder="SMITH"
-                    />
+                <div className="space-y-3 sm:space-y-5">
+                  {/* Mobile: side by side, Desktop: stacked */}
+                  <div className="grid grid-cols-2 sm:grid-cols-1 gap-3">
+                    <div>
+                      <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1 sm:mb-2">
+                        Last Name <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        className="w-full border border-slate-300 rounded-lg sm:rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-base sm:text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                        placeholder="SMITH"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1 sm:mb-2">
+                        First Name
+                      </label>
+                      <input
+                        type="text"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        className="w-full border border-slate-300 rounded-lg sm:rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-base sm:text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                        placeholder="JOHN"
+                      />
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      First Name
-                    </label>
-                    <input
-                      type="text"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      className="w-full border border-slate-300 rounded-xl px-4 py-3 text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                      placeholder="JOHN"
-                    />
+                  <div className="grid grid-cols-2 sm:grid-cols-1 gap-3">
+                    <div>
+                      <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1 sm:mb-2">
+                        Unit # <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={unitNumber}
+                        onChange={(e) => setUnitNumber(e.target.value)}
+                        className="w-full border border-slate-300 rounded-lg sm:rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-base sm:text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                        placeholder="1234"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1 sm:mb-2">
+                        Notes
+                      </label>
+                      <input
+                        type="text"
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                        className="w-full border border-slate-300 rounded-lg sm:rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-base sm:text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                        placeholder="VIP, late arrival, etc."
+                      />
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Unit # <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={unitNumber}
-                      onChange={(e) => setUnitNumber(e.target.value)}
-                      className="w-full border border-slate-300 rounded-xl px-4 py-3 text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                      placeholder="1234"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Notes
-                    </label>
-                    <input
-                      type="text"
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      className="w-full border border-slate-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                      placeholder="VIP, late arrival, etc."
-                    />
-                  </div>
-
-                  <div className="flex gap-3 pt-2">
+                  <div className="flex gap-2 sm:gap-3 pt-1 sm:pt-2">
                     <button
                       type="submit"
-                      className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3.5 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25"
+                      className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 text-sm sm:text-base"
                     >
                       {editingId ? (
                         <>
-                          <Edit3 className="w-5 h-5" />
+                          <Edit3 className="w-4 h-4 sm:w-5 sm:h-5" />
                           Update
                         </>
                       ) : (
                         <>
-                          <Plus className="w-5 h-5" />
-                          Add Arrival
+                          <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+                          Add
                         </>
                       )}
                     </button>
@@ -460,74 +465,71 @@ export function AdminPanel({
                       <button
                         type="button"
                         onClick={handleCancelEdit}
-                        className="px-4 bg-slate-200 text-slate-700 rounded-xl hover:bg-slate-300 transition-all"
+                        className="px-3 sm:px-4 bg-slate-200 text-slate-700 rounded-lg sm:rounded-xl hover:bg-slate-300 transition-all"
                       >
-                        <X className="w-5 h-5" />
+                        <X className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
                     )}
                   </div>
                 </div>
               </form>
 
-              <hr className="my-6 border-slate-200" />
+              <hr className="my-4 sm:my-6 border-slate-200" />
 
-              <div className="space-y-3">
+              <div className="grid grid-cols-2 sm:grid-cols-1 gap-2 sm:space-y-3 sm:gap-0">
                 <button
                   type="button"
                   onClick={() => setShowBulkModal(true)}
-                  className="w-full bg-slate-100 text-slate-700 py-3 rounded-xl font-medium hover:bg-slate-200 transition-all flex items-center justify-center gap-2"
+                  className="bg-slate-100 text-slate-700 py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium hover:bg-slate-200 transition-all flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-base"
                 >
-                  <Upload className="w-5 h-5" />
+                  <Upload className="w-4 h-4 sm:w-5 sm:h-5" />
                   Bulk Import
                 </button>
                 <button
                   type="button"
                   onClick={onLoadSample}
-                  className="w-full bg-emerald-50 text-emerald-700 py-3 rounded-xl font-medium hover:bg-emerald-100 transition-all flex items-center justify-center gap-2"
+                  className="bg-emerald-50 text-emerald-700 py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium hover:bg-emerald-100 transition-all flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-base"
                 >
-                  <Package className="w-5 h-5" />
-                  Load Sample Data
+                  <Package className="w-4 h-4 sm:w-5 sm:h-5" />
+                  Sample Data
                 </button>
                 <button
                   type="button"
                   onClick={handleClearAll}
-                  className="w-full bg-red-50 text-red-600 py-3 rounded-xl font-medium hover:bg-red-100 transition-all flex items-center justify-center gap-2"
+                  className="bg-red-50 text-red-600 py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium hover:bg-red-100 transition-all flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-base"
                 >
-                  <Trash2 className="w-5 h-5" />
+                  <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
                   Clear All
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setShowReportModal(true)}
+                  className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold hover:from-indigo-700 hover:to-indigo-800 transition-all flex items-center justify-center gap-1.5 sm:gap-2 shadow-lg shadow-indigo-500/25 text-xs sm:text-base"
+                >
+                  <FileDown className="w-4 h-4 sm:w-5 sm:h-5" />
+                  Export
+                </button>
               </div>
-
-              <hr className="my-6 border-slate-200" />
-
-              <button
-                type="button"
-                onClick={() => setShowReportModal(true)}
-                className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 text-white py-3 rounded-xl font-semibold hover:from-indigo-700 hover:to-indigo-800 transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25"
-              >
-                <FileDown className="w-5 h-5" />
-                Export Reports
-              </button>
             </div>
           </div>
 
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-              <div className="bg-slate-50 px-6 py-4 border-b border-slate-200">
-                <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                  <Users className="w-5 h-5 text-slate-600" />
+          <div className="lg:col-span-2 order-1 lg:order-2">
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+              <div className="bg-slate-50 px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-200">
+                <h2 className="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+                  <Users className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600" />
                   Today's Arrivals ({arrivals.length})
                 </h2>
               </div>
 
               {arrivals.length === 0 ? (
-                <div className="p-16 text-center text-slate-400">
-                  <Users className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                  <p className="text-lg font-medium">No arrivals yet</p>
-                  <p className="text-sm mt-2">Add arrivals using the form or click "Load Sample Data"</p>
+                <div className="p-8 sm:p-16 text-center text-slate-400">
+                  <Users className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 opacity-30" />
+                  <p className="text-base sm:text-lg font-medium">No arrivals yet</p>
+                  <p className="text-xs sm:text-sm mt-2">Add arrivals using the form or tap "Sample Data"</p>
                 </div>
               ) : (
-                <div className="divide-y divide-slate-100 max-h-[600px] overflow-y-auto">
+                <div className="divide-y divide-slate-100 max-h-[500px] sm:max-h-[600px] overflow-y-auto">
                   {sortedArrivals.map((arrival) => {
                     const isAwaitingId = arrival.signed_in_at && !arrival.id_verified && arrival.status === 'pending' && !arrival.is_flagged;
                     const isIdVerified = arrival.signed_in_at && arrival.id_verified && arrival.status === 'pending' && !arrival.is_flagged;
@@ -537,7 +539,7 @@ export function AdminPanel({
                     return (
                       <div
                         key={arrival.id}
-                        className={`px-6 py-4 transition-all ${
+                        className={`px-3 sm:px-6 py-3 sm:py-4 transition-all ${
                           isFlagged
                             ? 'bg-gradient-to-r from-red-100 to-red-50 border-l-4 border-red-600'
                             : isWalkIn && arrival.status === 'pending'
@@ -553,65 +555,73 @@ export function AdminPanel({
                             : 'hover:bg-slate-50'
                         }`}
                       >
-                        <div className="flex items-start justify-between gap-4">
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-3 flex-wrap mb-2">
-                              <span className="text-lg font-bold text-slate-800">
+                            {/* Name and Unit Row */}
+                            <div className="flex items-center gap-2 sm:gap-3 flex-wrap mb-1 sm:mb-2">
+                              <span className="text-base sm:text-lg font-bold text-slate-800">
                                 {arrival.last_name}, {arrival.first_name || '—'}
                               </span>
                               {isWalkIn ? (
-                                <div className="flex items-center gap-2">
-                                  <span className="bg-purple-600 text-white px-3 py-1 rounded-lg text-sm font-bold flex items-center gap-1.5">
-                                    <UserPlus className="w-4 h-4" />
-                                    WALK-IN
-                                  </span>
-                                  <div className="flex items-center gap-1">
-                                    <input
-                                      type="text"
-                                      placeholder="Unit #"
-                                      className="w-24 px-3 py-1 text-lg font-mono font-bold border-2 border-purple-400 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none"
-                                      onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                          const input = e.target as HTMLInputElement;
-                                          if (input.value.trim()) {
-                                            onUpdate(arrival.id, { unit_number: input.value.trim() });
-                                          }
-                                        }
-                                      }}
-                                      onBlur={(e) => {
-                                        if (e.target.value.trim()) {
-                                          onUpdate(arrival.id, { unit_number: e.target.value.trim() });
-                                        }
-                                      }}
-                                    />
-                                    <span className="text-xs text-purple-600 font-medium">Enter to assign</span>
-                                  </div>
-                                </div>
+                                <span className="bg-purple-600 text-white px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-1">
+                                  <UserPlus className="w-3 h-3 sm:w-4 sm:h-4" />
+                                  WALK-IN
+                                </span>
                               ) : (
-                                <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-lg text-lg font-mono font-bold">
+                                <span className="bg-blue-100 text-blue-800 px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg text-base sm:text-lg font-mono font-bold">
                                   {arrival.unit_number}
                                 </span>
                               )}
+                            </div>
+                            
+                            {/* Walk-in unit assignment */}
+                            {isWalkIn && (
+                              <div className="flex items-center gap-2 mb-2">
+                                <input
+                                  type="text"
+                                  placeholder="Assign Unit #"
+                                  className="w-28 sm:w-24 px-2 sm:px-3 py-1 text-base sm:text-lg font-mono font-bold border-2 border-purple-400 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none"
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      const input = e.target as HTMLInputElement;
+                                      if (input.value.trim()) {
+                                        onUpdate(arrival.id, { unit_number: input.value.trim() });
+                                      }
+                                    }
+                                  }}
+                                  onBlur={(e) => {
+                                    if (e.target.value.trim()) {
+                                      onUpdate(arrival.id, { unit_number: e.target.value.trim() });
+                                    }
+                                  }}
+                                />
+                                <span className="text-xs text-purple-600 font-medium hidden sm:inline">Enter to assign</span>
+                              </div>
+                            )}
+                            
+                            {/* Status badges */}
+                            <div className="flex flex-wrap gap-1 sm:gap-2 mb-1 sm:mb-2">
                               {isFlagged && (
-                                <span className="bg-red-600 text-white px-3 py-1 rounded-lg text-sm font-bold flex items-center gap-1.5">
-                                  <Ban className="w-4 h-4" />
-                                  DENIED - CHECK-IN BLOCKED
+                                <span className="bg-red-600 text-white px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-1">
+                                  <Ban className="w-3 h-3 sm:w-4 sm:h-4" />
+                                  <span className="hidden sm:inline">DENIED - CHECK-IN BLOCKED</span>
+                                  <span className="sm:hidden">DENIED</span>
                                 </span>
                               )}
                               {isAwaitingId && (
-                                <span className="bg-orange-500 text-white px-3 py-1 rounded-lg text-sm font-bold flex items-center gap-1.5 animate-bounce">
-                                  <Shield className="w-4 h-4" />
+                                <span className="bg-orange-500 text-white px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-1 animate-bounce">
+                                  <Shield className="w-3 h-3 sm:w-4 sm:h-4" />
                                   VERIFY ID
                                 </span>
                               )}
                               {isIdVerified && (
-                                <span className="bg-blue-500 text-white px-3 py-1 rounded-lg text-sm font-bold flex items-center gap-1.5">
-                                  <CheckCircle className="w-4 h-4" />
+                                <span className="bg-blue-500 text-white px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-1">
+                                  <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
                                   ID VERIFIED
                                 </span>
                               )}
-                              {arrival.notes && (
-                                <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-lg text-sm font-medium">
+                              {arrival.notes && arrival.notes !== 'WALK-IN' && (
+                                <span className="bg-slate-100 text-slate-600 px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg text-xs sm:text-sm font-medium">
                                   {arrival.notes}
                                 </span>
                               )}
@@ -619,9 +629,9 @@ export function AdminPanel({
                             
                             {/* Flag reason for flagged guests */}
                             {isFlagged && arrival.flag_reason && (
-                              <div className="bg-red-200/50 border border-red-300 rounded-lg px-3 py-2 mt-2 mb-2">
-                                <p className="text-red-800 text-sm font-medium flex items-start gap-2">
-                                  <Flag className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                              <div className="bg-red-200/50 border border-red-300 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 mt-1 sm:mt-2 mb-1 sm:mb-2">
+                                <p className="text-red-800 text-xs sm:text-sm font-medium flex items-start gap-1 sm:gap-2">
+                                  <Flag className="w-3 h-3 sm:w-4 sm:h-4 mt-0.5 flex-shrink-0" />
                                   <span><strong>Reason:</strong> {arrival.flag_reason}</span>
                                 </p>
                               </div>
@@ -629,42 +639,45 @@ export function AdminPanel({
                             
                             {/* Guest contact info for signed-in guests */}
                             {arrival.signed_in_at && (
-                              <div className="flex items-center gap-4 text-sm text-slate-600 mt-1">
+                              <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-slate-600 mt-1">
                                 {arrival.guest_phone && (
                                   <a 
                                     href={`tel:${arrival.guest_phone}`}
-                                    className="flex items-center gap-1.5 hover:text-blue-600 transition-colors"
+                                    className="flex items-center gap-1 hover:text-blue-600 transition-colors"
                                   >
-                                    <Phone className="w-4 h-4 text-slate-400 hover:text-blue-500" />
-                                    {arrival.guest_phone}
+                                    <Phone className="w-3 h-3 sm:w-4 sm:h-4 text-slate-400" />
+                                    <span className="hidden sm:inline">{arrival.guest_phone}</span>
+                                    <span className="sm:hidden">Call</span>
                                   </a>
                                 )}
                                 {arrival.guest_email && (
                                   <a 
                                     href={`mailto:${arrival.guest_email}`}
-                                    className="flex items-center gap-1.5 hover:text-blue-600 transition-colors"
+                                    className="flex items-center gap-1 hover:text-blue-600 transition-colors"
                                   >
-                                    <Mail className="w-4 h-4 text-slate-400 hover:text-blue-500" />
-                                    {arrival.guest_email}
+                                    <Mail className="w-3 h-3 sm:w-4 sm:h-4 text-slate-400" />
+                                    <span className="hidden sm:inline">{arrival.guest_email}</span>
+                                    <span className="sm:hidden">Email</span>
                                   </a>
                                 )}
                                 <span className="text-slate-400 text-xs">
-                                  Signed in {new Date(arrival.signed_in_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                                  {new Date(arrival.signed_in_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                                 </span>
                               </div>
                             )}
                           </div>
 
-                          <div className="flex items-center gap-2 flex-shrink-0">
+                          {/* Action buttons - stack on mobile */}
+                          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 flex-shrink-0 mt-2 sm:mt-0">
                             {/* Flagged guest actions */}
                             {isFlagged && (
                               <button
                                 type="button"
                                 onClick={() => handleClearFlag(arrival.id)}
-                                className="bg-slate-200 text-slate-700 px-4 py-2 rounded-xl font-semibold hover:bg-slate-300 transition-all flex items-center gap-2"
+                                className="bg-slate-200 text-slate-700 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-semibold hover:bg-slate-300 transition-all flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
                               >
-                                <X className="w-5 h-5" />
-                                Clear Flag
+                                <X className="w-4 h-4 sm:w-5 sm:h-5" />
+                                Clear
                               </button>
                             )}
                             
@@ -674,18 +687,18 @@ export function AdminPanel({
                                 <button
                                   type="button"
                                   onClick={() => onUpdate(arrival.id, { id_verified: true })}
-                                  className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2 rounded-xl font-semibold hover:from-orange-600 hover:to-orange-700 transition-all flex items-center gap-2 shadow-lg shadow-orange-500/25"
+                                  className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-semibold hover:from-orange-600 hover:to-orange-700 transition-all flex items-center gap-1 sm:gap-2 shadow-lg shadow-orange-500/25 text-xs sm:text-sm"
                                 >
-                                  <Shield className="w-5 h-5" />
-                                  Verify ID
+                                  <Shield className="w-4 h-4 sm:w-5 sm:h-5" />
+                                  Verify
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => handleOpenFlagModal(arrival)}
-                                  className="bg-red-100 text-red-600 px-3 py-2 rounded-xl font-semibold hover:bg-red-200 transition-all flex items-center gap-1.5"
+                                  className="bg-red-100 text-red-600 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-semibold hover:bg-red-200 transition-all flex items-center gap-1 text-xs sm:text-sm"
                                 >
-                                  <Flag className="w-5 h-5" />
-                                  Flag Issue
+                                  <Flag className="w-4 h-4 sm:w-5 sm:h-5" />
+                                  <span className="hidden sm:inline">Flag</span>
                                 </button>
                               </>
                             )}
@@ -696,18 +709,18 @@ export function AdminPanel({
                                 <button
                                   type="button"
                                   onClick={() => onUpdate(arrival.id, { status: 'checked-in' })}
-                                  className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-4 py-2 rounded-xl font-semibold hover:from-emerald-600 hover:to-emerald-700 transition-all flex items-center gap-2 shadow-lg shadow-emerald-500/25"
+                                  className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-semibold hover:from-emerald-600 hover:to-emerald-700 transition-all flex items-center gap-1 sm:gap-2 shadow-lg shadow-emerald-500/25 text-xs sm:text-sm"
                                 >
-                                  <CheckCircle className="w-5 h-5" />
-                                  Check In & Give Keys
+                                  <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                                  <span className="hidden sm:inline">Check In & Give Keys</span>
+                                  <span className="sm:hidden">Check In</span>
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => handleOpenFlagModal(arrival)}
-                                  className="bg-red-100 text-red-600 px-3 py-2 rounded-xl font-semibold hover:bg-red-200 transition-all flex items-center gap-1.5"
+                                  className="bg-red-100 text-red-600 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-semibold hover:bg-red-200 transition-all flex items-center gap-1 text-xs sm:text-sm"
                                 >
-                                  <Flag className="w-5 h-5" />
-                                  Flag
+                                  <Flag className="w-4 h-4 sm:w-5 sm:h-5" />
                                 </button>
                               </>
                             )}
@@ -718,7 +731,7 @@ export function AdminPanel({
                                 <select
                                   value={arrival.status}
                                   onChange={(e) => onUpdate(arrival.id, { status: e.target.value as Arrival['status'] })}
-                                  className={`rounded-xl px-3 py-2 text-sm font-semibold border-2 cursor-pointer transition-all ${
+                                  className={`rounded-lg sm:rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold border-2 cursor-pointer transition-all ${
                                     arrival.status === 'pending' ? 'border-amber-300 bg-amber-50 text-amber-700' :
                                     arrival.status === 'checked-in' ? 'border-emerald-300 bg-emerald-50 text-emerald-700' :
                                     'border-red-300 bg-red-50 text-red-700'
@@ -732,10 +745,10 @@ export function AdminPanel({
                                   <button
                                     type="button"
                                     onClick={() => handleOpenFlagModal(arrival)}
-                                    className="p-2.5 text-red-500 hover:bg-red-100 rounded-xl transition-all"
+                                    className="p-1.5 sm:p-2.5 text-red-500 hover:bg-red-100 rounded-lg sm:rounded-xl transition-all"
                                     title="Flag Issue"
                                   >
-                                    <Flag className="w-5 h-5" />
+                                    <Flag className="w-4 h-4 sm:w-5 sm:h-5" />
                                   </button>
                                 )}
                               </>
@@ -743,25 +756,26 @@ export function AdminPanel({
                             
                             {/* Show status badge for checked-in guests who went through sign-in */}
                             {arrival.signed_in_at && arrival.status === 'checked-in' && !isFlagged && (
-                              <span className="bg-emerald-100 text-emerald-700 px-3 py-2 rounded-xl text-sm font-semibold flex items-center gap-1.5">
-                                <CheckCircle className="w-4 h-4" />
-                                Checked In
+                              <span className="bg-emerald-100 text-emerald-700 px-2 sm:px-3 py-1 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-1">
+                                <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                                <span className="hidden sm:inline">Checked In</span>
+                                <span className="sm:hidden">Done</span>
                               </span>
                             )}
                             
                             <button
                               type="button"
                               onClick={() => handleEdit(arrival)}
-                              className="p-2.5 text-blue-600 hover:bg-blue-100 rounded-xl transition-all"
+                              className="p-1.5 sm:p-2.5 text-blue-600 hover:bg-blue-100 rounded-lg sm:rounded-xl transition-all"
                             >
-                              <Edit3 className="w-5 h-5" />
+                              <Edit3 className="w-4 h-4 sm:w-5 sm:h-5" />
                             </button>
                             <button
                               type="button"
                               onClick={() => onRemove(arrival.id)}
-                              className="p-2.5 text-red-500 hover:bg-red-100 rounded-xl transition-all"
+                              className="p-1.5 sm:p-2.5 text-red-500 hover:bg-red-100 rounded-lg sm:rounded-xl transition-all"
                             >
-                              <Trash2 className="w-5 h-5" />
+                              <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
                             </button>
                           </div>
                         </div>
