@@ -30,10 +30,6 @@ function App() {
     setIsAuthenticated(false);
   };
 
-  if (!isAuthenticated) {
-    return <PasswordGate onAuthenticated={() => setIsAuthenticated(true)} />;
-  }
-
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(interval);
@@ -250,6 +246,11 @@ function App() {
       message: `Welcome, ${guestInfo.firstName}! Your unit is ${arrivalToUpdate.unit_number}.` 
     };
   };
+
+  // Password gate - must be after all hooks
+  if (!isAuthenticated) {
+    return <PasswordGate onAuthenticated={() => setIsAuthenticated(true)} />;
+  }
 
   if (loading) {
     return (
