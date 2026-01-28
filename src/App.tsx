@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Settings, Monitor, Tablet } from 'lucide-react';
+import { Settings, Monitor, Tablet, LogOut } from 'lucide-react';
 import { supabase, type Arrival } from './lib/supabase';
 import { AdminPanel } from './components/AdminPanel';
 import { DisplayView } from './components/DisplayView';
 import { GuestSignIn } from './components/GuestSignIn';
+import { PasswordGate } from './components/PasswordGate';
 
 type View = 'admin' | 'display' | 'guest';
 
@@ -16,10 +17,22 @@ function getLocalDateString(): string {
 }
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('arrivalhub_authenticated') === 'true';
+  });
   const [view, setView] = useState<View>('admin');
   const [arrivals, setArrivals] = useState<Arrival[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [loading, setLoading] = useState(true);
+
+  const handleLogout = () => {
+    localStorage.removeItem('arrivalhub_authenticated');
+    setIsAuthenticated(false);
+  };
+
+  if (!isAuthenticated) {
+    return <PasswordGate onAuthenticated={() => setIsAuthenticated(true)} />;
+  }
 
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -251,7 +264,16 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-100">
-      <div className="bg-slate-900 text-white px-4 py-2 flex justify-center gap-2">
+      <div className="bg-slate-900 text-white px-4 py-2 flex justify-between items-center">
+        <button
+          onClick={handleLogout}
+          className="px-3 py-2 rounded-xl font-medium transition-all bg-slate-800 hover:bg-red-600 flex items-center gap-2 text-sm"
+          title="Logout"
+        >
+          <LogOut className="w-4 h-4" />
+          <span className="hidden sm:inline">Logout</span>
+        </button>
+        <div className="flex gap-2">
         <button
           onClick={() => setView('admin')}
           className={`px-6 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2 ${
@@ -285,6 +307,8 @@ function App() {
           <Tablet className="w-5 h-5" />
           Guest Sign-In
         </button>
+        </div>
+        <div className="w-20 hidden sm:block"></div>
       </div>
 
       {view === 'admin' && (
