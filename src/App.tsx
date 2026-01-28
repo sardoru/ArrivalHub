@@ -67,15 +67,27 @@ function App() {
           schema: 'public',
           table: 'arrivals'
         },
-        () => {
+        (payload) => {
+          console.log('Realtime update received:', payload);
           fetchArrivals();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Realtime subscription status:', status);
+      });
 
     return () => {
       supabase.removeChannel(channel);
     };
+  }, [fetchArrivals]);
+
+  // Poll for updates as backup (every 5 seconds)
+  useEffect(() => {
+    const pollInterval = setInterval(() => {
+      fetchArrivals();
+    }, 5000);
+
+    return () => clearInterval(pollInterval);
   }, [fetchArrivals]);
 
   const addArrival = async (arrival: Omit<Arrival, 'id' | 'created_at' | 'updated_at' | 'arrival_date'>) => {
