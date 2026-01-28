@@ -17,6 +17,9 @@ function getLocalDateString(): string {
 }
 
 function App() {
+  // Check for kiosk mode (Guest Sign-In only, no password required)
+  const isKioskMode = new URLSearchParams(window.location.search).get('kiosk') === 'true';
+  
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return localStorage.getItem('arrivalhub_authenticated') === 'true';
   });
@@ -246,6 +249,11 @@ function App() {
       message: `Welcome, ${guestInfo.firstName}! Your unit is ${arrivalToUpdate.unit_number}.` 
     };
   };
+
+  // Kiosk mode - Guest Sign-In only, no password required
+  if (isKioskMode) {
+    return <GuestSignIn onSignIn={signInGuest} />;
+  }
 
   // Password gate - must be after all hooks
   if (!isAuthenticated) {
