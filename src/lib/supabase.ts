@@ -15,4 +15,13 @@ export type Arrival = {
   arrival_date: string;
   created_at: string;
   updated_at: string;
+  // Guest sign-in fields
+  guest_phone: string;
+  guest_email: string;
+  signed_in_at: string | null;
+  rules_accepted: boolean;
+  id_verified: boolean;
+  // Flag fields
+  is_flagged: boolean;
+  flag_reason: string;
 };

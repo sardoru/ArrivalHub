@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Settings, Monitor } from 'lucide-react';
+import { Settings, Monitor, Tablet } from 'lucide-react';
 import { supabase, type Arrival } from './lib/supabase';
 import { AdminPanel } from './components/AdminPanel';
 import { DisplayView } from './components/DisplayView';
+import { GuestSignIn } from './components/GuestSignIn';
 
-type View = 'admin' | 'display';
+type View = 'admin' | 'display' | 'guest';
 
 function getLocalDateString(): string {
   const now = new Date();
@@ -184,6 +185,59 @@ function App() {
     updateArrival(id, { status: 'checked-in' });
   };
 
+  const signInGuest = async (guestInfo: {
+    firstName: string;
+    lastName: string;
+    phone: string;
+    email: string;
+  }): Promise<{ success: boolean; message: string }> => {
+    const today = getLocalDateString();
+    const normalizedLastName = guestInfo.lastName.trim().toUpperCase();
+    
+    // Find matching arrivals by last name (case-insensitive)
+    const { data: matchingArrivals, error: fetchError } = await supabase
+      .from('arrivals')
+      .select('*')
+      .eq('arrival_date', today)
+      .ilike('last_name', normalizedLastName)
+      .is('signed_in_at', null);
+
+    if (fetchError) {
+      console.error('Error finding arrival:', fetchError);
+      return { success: false, message: 'Unable to process sign-in. Please see front desk.' };
+    }
+
+    if (!matchingArrivals || matchingArrivals.length === 0) {
+      return { 
+        success: false, 
+        message: `No reservation found for "${guestInfo.lastName}". Please see front desk for assistance.` 
+      };
+    }
+
+    // Update the first matching arrival with guest info
+    const arrivalToUpdate = matchingArrivals[0];
+    const { error: updateError } = await supabase
+      .from('arrivals')
+      .update({
+        guest_phone: guestInfo.phone,
+        guest_email: guestInfo.email,
+        signed_in_at: new Date().toISOString(),
+        rules_accepted: true,
+      })
+      .eq('id', arrivalToUpdate.id);
+
+    if (updateError) {
+      console.error('Error updating arrival:', updateError);
+      return { success: false, message: 'Unable to complete sign-in. Please see front desk.' };
+    }
+
+    await fetchArrivals();
+    return { 
+      success: true, 
+      message: `Welcome, ${guestInfo.firstName}! Your unit is ${arrivalToUpdate.unit_number}.` 
+    };
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
@@ -220,9 +274,20 @@ function App() {
           <Monitor className="w-5 h-5" />
           Display View
         </button>
+        <button
+          onClick={() => setView('guest')}
+          className={`px-6 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2 ${
+            view === 'guest'
+              ? 'bg-amber-600 shadow-lg shadow-amber-500/30'
+              : 'bg-slate-800 hover:bg-slate-700'
+          }`}
+        >
+          <Tablet className="w-5 h-5" />
+          Guest Sign-In
+        </button>
       </div>
 
-      {view === 'admin' ? (
+      {view === 'admin' && (
         <AdminPanel
           arrivals={arrivals}
           onAdd={addArrival}
@@ -232,12 +297,16 @@ function App() {
           onBulkImport={bulkImport}
           onLoadSample={loadSample}
         />
-      ) : (
+      )}
+      {view === 'display' && (
         <DisplayView
           arrivals={arrivals}
           currentTime={currentTime}
           onCheckIn={handleCheckIn}
         />
+      )}
+      {view === 'guest' && (
+        <GuestSignIn onSignIn={signInGuest} />
       )}
     </div>
   );
