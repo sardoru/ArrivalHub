@@ -8,11 +8,21 @@ import { PasswordGate } from './components/PasswordGate';
 
 type View = 'admin' | 'display' | 'guest';
 
+// App timezone - configurable via env variable, defaults to Central Time
+const APP_TIMEZONE = import.meta.env.VITE_APP_TIMEZONE || 'America/Chicago';
+
 function getLocalDateString(): string {
+  // Use consistent timezone across all users
   const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
+  const options: Intl.DateTimeFormatOptions = {
+    timeZone: APP_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  };
+  // Format: MM/DD/YYYY, then convert to YYYY-MM-DD
+  const formatted = now.toLocaleDateString('en-US', options);
+  const [month, day, year] = formatted.split('/');
   return `${year}-${month}-${day}`;
 }
 
