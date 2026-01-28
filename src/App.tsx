@@ -373,6 +373,7 @@ function App() {
     lastName: string;
     phone: string;
     email: string;
+    signature: string | null;
   }): Promise<{ success: boolean; message: string }> => {
     const today = getLocalDateString();
     const normalizedLastName = guestInfo.lastName.trim().toUpperCase();
@@ -401,6 +402,7 @@ function App() {
           guest_email: guestInfo.email,
           signed_in_at: new Date().toISOString(),
           rules_accepted: true,
+          signature: guestInfo.signature,
         })
         .eq('id', arrivalToUpdate.id);
 
@@ -440,6 +442,7 @@ function App() {
         guest_email: guestInfo.email,
         signed_in_at: new Date().toISOString(),
         rules_accepted: true,
+        signature: guestInfo.signature,
       }]);
 
     if (insertError) {

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Upload, Trash2, Edit3, X, Package, Calendar, Users, CheckCircle, Clock, XCircle, Shield, Phone, Mail, AlertCircle, Flag, Ban, FileDown, Download, UserPlus } from 'lucide-react';
+import { Plus, Upload, Trash2, Edit3, X, Package, Calendar, Users, CheckCircle, Clock, XCircle, Shield, Phone, Mail, AlertCircle, Flag, Ban, FileDown, Download, UserPlus, PenTool } from 'lucide-react';
 import { supabase, type Arrival } from '../lib/supabase';
 
 type AdminPanelProps = {
@@ -42,6 +42,7 @@ export function AdminPanel({
   });
   const [reportData, setReportData] = useState<Arrival[] | null>(null);
   const [isLoadingReport, setIsLoadingReport] = useState(false);
+  const [viewingSignature, setViewingSignature] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -660,6 +661,16 @@ export function AdminPanel({
                                     <span className="sm:hidden">Email</span>
                                   </a>
                                 )}
+                                {arrival.signature && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setViewingSignature(arrival.signature)}
+                                    className="flex items-center gap-1 hover:text-blue-600 transition-colors"
+                                  >
+                                    <PenTool className="w-3 h-3 sm:w-4 sm:h-4 text-slate-400" />
+                                    <span>Signature</span>
+                                  </button>
+                                )}
                                 <span className="text-slate-400 text-xs">
                                   {new Date(arrival.signed_in_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                                 </span>
@@ -1101,6 +1112,33 @@ export function AdminPanel({
                 Close
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Signature Viewing Modal */}
+      {viewingSignature && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6">
+            <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+              <PenTool className="w-6 h-6 text-slate-600" />
+              Guest Signature
+            </h3>
+            <div className="bg-slate-100 rounded-xl p-4 mb-4">
+              <img 
+                src={viewingSignature} 
+                alt="Guest signature" 
+                className="w-full h-auto rounded-lg"
+                style={{ backgroundColor: 'rgb(30, 41, 59)' }}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => setViewingSignature(null)}
+              className="w-full bg-slate-200 text-slate-700 py-3 rounded-xl font-semibold hover:bg-slate-300 transition-all"
+            >
+              Close
+            </button>
           </div>
         </div>
       )}

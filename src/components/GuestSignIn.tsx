@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { User, Phone, Mail, Shield, CheckCircle, ArrowRight, ArrowLeft, Building2, Globe } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { User, Phone, Mail, Shield, CheckCircle, ArrowRight, ArrowLeft, Building2, Globe, PenTool, RotateCcw } from 'lucide-react';
+import SignaturePad from 'signature_pad';
 
 type GuestSignInProps = {
   onSignIn: (guestInfo: {
@@ -7,6 +8,7 @@ type GuestSignInProps = {
     lastName: string;
     phone: string;
     email: string;
+    signature: string | null;
   }) => Promise<{ success: boolean; message: string }>;
 };
 
@@ -64,6 +66,54 @@ export function GuestSignIn({ onSignIn }: GuestSignInProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  
+  // Signature pad
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const signaturePadRef = useRef<SignaturePad | null>(null);
+  const [hasSignature, setHasSignature] = useState(false);
+
+  // Initialize signature pad when on rules step
+  useEffect(() => {
+    if (step === 'rules' && canvasRef.current && !signaturePadRef.current) {
+      const canvas = canvasRef.current;
+      
+      // Set canvas size for high DPI displays
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+      canvas.width = canvas.offsetWidth * ratio;
+      canvas.height = canvas.offsetHeight * ratio;
+      canvas.getContext('2d')?.scale(ratio, ratio);
+      
+      signaturePadRef.current = new SignaturePad(canvas, {
+        backgroundColor: 'rgb(30, 41, 59)', // slate-800
+        penColor: 'rgb(255, 255, 255)', // white
+        minWidth: 1,
+        maxWidth: 3,
+      });
+      
+      signaturePadRef.current.addEventListener('endStroke', () => {
+        setHasSignature(!signaturePadRef.current?.isEmpty());
+      });
+    }
+    
+    return () => {
+      if (signaturePadRef.current) {
+        signaturePadRef.current.off();
+        signaturePadRef.current = null;
+      }
+    };
+  }, [step]);
+
+  const clearSignature = () => {
+    signaturePadRef.current?.clear();
+    setHasSignature(false);
+  };
+
+  const getSignatureData = (): string | null => {
+    if (signaturePadRef.current?.isEmpty()) {
+      return null;
+    }
+    return signaturePadRef.current?.toDataURL('image/png') || null;
+  };
 
   const handleInfoSubmit = () => {
     if (!firstName.trim()) {
@@ -91,16 +141,23 @@ export function GuestSignIn({ onSignIn }: GuestSignInProps) {
       setError('Please accept all building rules to continue');
       return;
     }
+    
+    if (!hasSignature) {
+      setError('Please sign below to accept the building rules');
+      return;
+    }
 
     setError('');
     setIsSubmitting(true);
 
     try {
+      const signature = getSignatureData();
       const result = await onSignIn({
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         phone: phone.trim(),
         email: email.trim(),
+        signature,
       });
 
       if (result.success) {
@@ -124,6 +181,8 @@ export function GuestSignIn({ onSignIn }: GuestSignInProps) {
     setIsInternationalPhone(false);
     setEmail('');
     setRulesAccepted(false);
+    setHasSignature(false);
+    clearSignature();
     setError('');
     setSuccessMessage('');
   };
@@ -251,6 +310,42 @@ export function GuestSignIn({ onSignIn }: GuestSignInProps) {
                 I have read and accept all building rules
               </span>
             </label>
+
+            {/* Signature Pad */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <label className="text-slate-300 text-lg font-medium flex items-center gap-2">
+                  <PenTool className="w-5 h-5" />
+                  Your Signature
+                </label>
+                <button
+                  type="button"
+                  onClick={clearSignature}
+                  className="text-slate-400 hover:text-white text-sm flex items-center gap-1 transition-colors"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Clear
+                </button>
+              </div>
+              <div className={`relative rounded-xl overflow-hidden border-2 ${hasSignature ? 'border-emerald-500' : 'border-slate-600'} transition-colors`}>
+                <canvas
+                  ref={canvasRef}
+                  className="w-full h-32 sm:h-40 bg-slate-800 touch-none"
+                  style={{ touchAction: 'none' }}
+                />
+                {!hasSignature && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <p className="text-slate-500 text-lg">Sign here with your finger</p>
+                  </div>
+                )}
+              </div>
+              {hasSignature && (
+                <p className="text-emerald-400 text-sm mt-2 flex items-center gap-1">
+                  <CheckCircle className="w-4 h-4" />
+                  Signature captured
+                </p>
+              )}
+            </div>
 
             {error && (
               <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-4 mb-6">

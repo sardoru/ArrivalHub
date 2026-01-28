@@ -21,6 +21,7 @@ export type Arrival = {
   signed_in_at: string | null;
   rules_accepted: boolean;
   id_verified: boolean;
+  signature: string | null;
   // Flag fields
   is_flagged: boolean;
   flag_reason: string;
