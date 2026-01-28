@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Settings, Monitor, Tablet, LogOut } from 'lucide-react';
 import { supabase, type Arrival } from './lib/supabase';
 import { AdminPanel } from './components/AdminPanel';
@@ -16,6 +16,36 @@ function getLocalDateString(): string {
   return `${year}-${month}-${day}`;
 }
 
+// Play a notification ping sound using Web Audio API
+function playNotificationSound() {
+  try {
+    const audioContext = new (window.AudioContext || (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    
+    // Create oscillator for the ping
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    // Pleasant ping sound - two tones
+    oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // A5
+    oscillator.frequency.setValueAtTime(1320, audioContext.currentTime + 0.1); // E6
+    
+    oscillator.type = 'sine';
+    
+    // Fade in and out for a smooth sound
+    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.05);
+    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.4);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.4);
+  } catch (e) {
+    console.log('Could not play notification sound:', e);
+  }
+}
+
 function App() {
   // Check for kiosk mode (Guest Sign-In only, no password required)
   const isKioskMode = new URLSearchParams(window.location.search).get('kiosk') === 'true';
@@ -27,6 +57,10 @@ function App() {
   const [arrivals, setArrivals] = useState<Arrival[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [loading, setLoading] = useState(true);
+  
+  // Track signed-in arrivals to detect new sign-ins
+  const previousSignedInIdsRef = useRef<Set<string>>(new Set());
+  const isInitialLoadRef = useRef(true);
 
   const handleLogout = () => {
     localStorage.removeItem('arrivalhub_authenticated');
@@ -89,6 +123,40 @@ function App() {
 
     return () => clearInterval(pollInterval);
   }, [fetchArrivals]);
+
+  // Detect new sign-ins and play notification sound (only on admin/display views)
+  useEffect(() => {
+    if (isKioskMode || view === 'guest') return;
+    
+    const currentSignedInIds = new Set(
+      arrivals.filter(a => a.signed_in_at).map(a => a.id)
+    );
+    
+    // Skip sound on initial page load
+    if (isInitialLoadRef.current) {
+      previousSignedInIdsRef.current = currentSignedInIds;
+      if (arrivals.length > 0) {
+        isInitialLoadRef.current = false;
+      }
+      return;
+    }
+    
+    // Check if there are any new sign-ins
+    let hasNewSignIn = false;
+    currentSignedInIds.forEach(id => {
+      if (!previousSignedInIdsRef.current.has(id)) {
+        hasNewSignIn = true;
+      }
+    });
+    
+    // Play sound if new sign-in detected
+    if (hasNewSignIn) {
+      playNotificationSound();
+    }
+    
+    // Update the ref with current signed-in IDs
+    previousSignedInIdsRef.current = currentSignedInIds;
+  }, [arrivals, isKioskMode, view]);
 
   const addArrival = async (arrival: Omit<Arrival, 'id' | 'created_at' | 'updated_at' | 'arrival_date'>) => {
     const today = getLocalDateString();
