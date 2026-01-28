@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Settings, Monitor, Tablet, LogOut } from 'lucide-react';
+import { Settings, Monitor, Tablet, Building2, LogOut } from 'lucide-react';
 import { supabase, type Arrival } from './lib/supabase';
 import { AdminPanel } from './components/AdminPanel';
 import { DisplayView } from './components/DisplayView';
 import { GuestSignIn } from './components/GuestSignIn';
 import { PasswordGate } from './components/PasswordGate';
+import { UnitsView } from './components/UnitsView';
 
-type View = 'admin' | 'display' | 'guest';
+type View = 'admin' | 'display' | 'guest' | 'units';
 
 // App timezone - configurable via env variable, defaults to Central Time
 const APP_TIMEZONE = import.meta.env.VITE_APP_TIMEZONE || 'America/Chicago';
@@ -429,6 +430,17 @@ function App() {
           <Tablet className="w-5 h-5" />
           Guest Sign-In
         </button>
+        <button
+          onClick={() => setView('units')}
+          className={`px-6 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2 ${
+            view === 'units'
+              ? 'bg-violet-600 shadow-lg shadow-violet-500/30'
+              : 'bg-slate-800 hover:bg-slate-700'
+          }`}
+        >
+          <Building2 className="w-5 h-5" />
+          Units
+        </button>
         </div>
         <div className="w-20 hidden sm:block"></div>
       </div>
@@ -453,6 +465,9 @@ function App() {
       )}
       {view === 'guest' && (
         <GuestSignIn onSignIn={signInGuest} />
+      )}
+      {view === 'units' && (
+        <UnitsView arrivals={arrivals} />
       )}
     </div>
   );
