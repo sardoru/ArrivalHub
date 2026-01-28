@@ -119,16 +119,6 @@ async function sendSlackNotification(guestInfo: {
             text: `🕐 Signed in at *${timeString}* CT`
           }
         ]
-      },
-      {
-        type: 'divider'
-      },
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: '⚠️ *Action Required:* Verify guest ID before check-in'
-        }
       }
     ]
   };
