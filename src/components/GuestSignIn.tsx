@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, Phone, Mail, Shield, CheckCircle, ArrowRight, ArrowLeft, Building2 } from 'lucide-react';
+import { User, Phone, Mail, Shield, CheckCircle, ArrowRight, ArrowLeft, Building2, Globe } from 'lucide-react';
 
 type GuestSignInProps = {
   onSignIn: (guestInfo: {
@@ -12,11 +12,53 @@ type GuestSignInProps = {
 
 type Step = 'info' | 'rules' | 'success';
 
+// Format phone number as user types
+function formatPhoneNumber(value: string): { formatted: string; isInternational: boolean } {
+  // Check if it starts with + (international)
+  const isInternational = value.startsWith('+');
+  
+  if (isInternational) {
+    // International format: keep + and add spaces for readability
+    const digits = value.replace(/[^\d]/g, '');
+    
+    if (digits.length <= 1) {
+      return { formatted: '+' + digits, isInternational: true };
+    } else if (digits.length <= 4) {
+      // Country code + start of number
+      return { formatted: '+' + digits.slice(0, 1) + ' ' + digits.slice(1), isInternational: true };
+    } else if (digits.length <= 7) {
+      return { formatted: '+' + digits.slice(0, 1) + ' ' + digits.slice(1, 4) + ' ' + digits.slice(4), isInternational: true };
+    } else {
+      return { 
+        formatted: '+' + digits.slice(0, 1) + ' ' + digits.slice(1, 4) + ' ' + digits.slice(4, 7) + ' ' + digits.slice(7, 15), 
+        isInternational: true 
+      };
+    }
+  } else {
+    // US format: (XXX) XXX-XXXX
+    const digits = value.replace(/\D/g, '');
+    
+    // Remove leading 1 if present (US country code)
+    const usDigits = digits.startsWith('1') && digits.length > 10 ? digits.slice(1) : digits;
+    
+    if (usDigits.length === 0) {
+      return { formatted: '', isInternational: false };
+    } else if (usDigits.length <= 3) {
+      return { formatted: `(${usDigits}`, isInternational: false };
+    } else if (usDigits.length <= 6) {
+      return { formatted: `(${usDigits.slice(0, 3)}) ${usDigits.slice(3)}`, isInternational: false };
+    } else {
+      return { formatted: `(${usDigits.slice(0, 3)}) ${usDigits.slice(3, 6)}-${usDigits.slice(6, 10)}`, isInternational: false };
+    }
+  }
+}
+
 export function GuestSignIn({ onSignIn }: GuestSignInProps) {
   const [step, setStep] = useState<Step>('info');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
+  const [isInternationalPhone, setIsInternationalPhone] = useState(false);
   const [email, setEmail] = useState('');
   const [rulesAccepted, setRulesAccepted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -79,6 +121,7 @@ export function GuestSignIn({ onSignIn }: GuestSignInProps) {
     setFirstName('');
     setLastName('');
     setPhone('');
+    setIsInternationalPhone(false);
     setEmail('');
     setRulesAccepted(false);
     setError('');
@@ -285,15 +328,29 @@ export function GuestSignIn({ onSignIn }: GuestSignInProps) {
               <label className="block text-slate-300 text-lg font-medium mb-3">
                 <Phone className="w-5 h-5 inline mr-2" />
                 Phone Number
+                {isInternationalPhone && (
+                  <span className="ml-2 inline-flex items-center gap-1 text-sm text-blue-400">
+                    <Globe className="w-4 h-4" />
+                    International
+                  </span>
+                )}
               </label>
               <input
                 type="tel"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => {
+                  const input = e.target.value;
+                  const { formatted, isInternational } = formatPhoneNumber(input);
+                  setPhone(formatted);
+                  setIsInternationalPhone(isInternational);
+                }}
                 className="w-full bg-slate-700/50 border border-slate-600 rounded-xl px-5 py-4 text-2xl text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                 placeholder="(555) 123-4567"
                 autoComplete="tel"
               />
+              <p className="text-slate-500 text-sm mt-2">
+                For international numbers, start with + (e.g., +44 20 7123 4567)
+              </p>
             </div>
 
             <div>
