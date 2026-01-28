@@ -134,8 +134,11 @@ async function sendSlackNotification(guestInfo: {
   };
   
   try {
+    // Use no-cors mode to bypass CORS restrictions
+    // Note: We can't read the response, but Slack will receive the message
     await fetch(SLACK_WEBHOOK_URL, {
       method: 'POST',
+      mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(message),
     });
