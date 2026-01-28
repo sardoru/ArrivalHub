@@ -56,6 +56,94 @@ function playNotificationSound() {
   }
 }
 
+// Send Slack notification when guest signs in
+const SLACK_WEBHOOK_URL = import.meta.env.VITE_SLACK_WEBHOOK_URL;
+
+async function sendSlackNotification(guestInfo: {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+  unitNumber: string;
+  isWalkIn: boolean;
+}) {
+  if (!SLACK_WEBHOOK_URL) return;
+  
+  const now = new Date();
+  const timeString = now.toLocaleTimeString('en-US', { 
+    hour: 'numeric', 
+    minute: '2-digit',
+    timeZone: APP_TIMEZONE 
+  });
+  
+  const unitDisplay = guestInfo.isWalkIn 
+    ? '🚶 *WALK-IN* - No unit assigned' 
+    : `🏠 Unit: *${guestInfo.unitNumber}*`;
+  
+  const message = {
+    blocks: [
+      {
+        type: 'header',
+        text: {
+          type: 'plain_text',
+          text: '🔔 New Guest Sign-In',
+          emoji: true
+        }
+      },
+      {
+        type: 'section',
+        fields: [
+          {
+            type: 'mrkdwn',
+            text: `👤 *Name:*\n${guestInfo.lastName}, ${guestInfo.firstName}`
+          },
+          {
+            type: 'mrkdwn',
+            text: unitDisplay
+          },
+          {
+            type: 'mrkdwn',
+            text: `📱 *Phone:*\n${guestInfo.phone}`
+          },
+          {
+            type: 'mrkdwn',
+            text: `📧 *Email:*\n${guestInfo.email}`
+          }
+        ]
+      },
+      {
+        type: 'context',
+        elements: [
+          {
+            type: 'mrkdwn',
+            text: `🕐 Signed in at *${timeString}* CT`
+          }
+        ]
+      },
+      {
+        type: 'divider'
+      },
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: '⚠️ *Action Required:* Verify guest ID before check-in'
+        }
+      }
+    ]
+  };
+  
+  try {
+    await fetch(SLACK_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(message),
+    });
+  } catch (error) {
+    console.error('Failed to send Slack notification:', error);
+  }
+}
+
 function App() {
   // Check for kiosk mode (Guest Sign-In only, no password required)
   const isKioskMode = new URLSearchParams(window.location.search).get('kiosk') === 'true';
@@ -328,6 +416,16 @@ function App() {
         return { success: false, message: 'Unable to complete sign-in. Please see front desk.' };
       }
 
+      // Send Slack notification
+      sendSlackNotification({
+        firstName: guestInfo.firstName,
+        lastName: normalizedLastName,
+        phone: guestInfo.phone,
+        email: guestInfo.email,
+        unitNumber: arrivalToUpdate.unit_number,
+        isWalkIn: false,
+      });
+
       await fetchArrivals();
       return { 
         success: true, 
@@ -355,6 +453,16 @@ function App() {
       console.error('Error creating walk-in:', insertError);
       return { success: false, message: 'Unable to complete sign-in. Please see front desk.' };
     }
+
+    // Send Slack notification for walk-in
+    sendSlackNotification({
+      firstName: guestInfo.firstName,
+      lastName: normalizedLastName,
+      phone: guestInfo.phone,
+      email: guestInfo.email,
+      unitNumber: '',
+      isWalkIn: true,
+    });
 
     await fetchArrivals();
     return { 
