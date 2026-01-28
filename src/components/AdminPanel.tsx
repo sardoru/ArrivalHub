@@ -631,16 +631,22 @@ export function AdminPanel({
                             {arrival.signed_in_at && (
                               <div className="flex items-center gap-4 text-sm text-slate-600 mt-1">
                                 {arrival.guest_phone && (
-                                  <span className="flex items-center gap-1.5">
-                                    <Phone className="w-4 h-4 text-slate-400" />
+                                  <a 
+                                    href={`tel:${arrival.guest_phone}`}
+                                    className="flex items-center gap-1.5 hover:text-blue-600 transition-colors"
+                                  >
+                                    <Phone className="w-4 h-4 text-slate-400 hover:text-blue-500" />
                                     {arrival.guest_phone}
-                                  </span>
+                                  </a>
                                 )}
                                 {arrival.guest_email && (
-                                  <span className="flex items-center gap-1.5">
-                                    <Mail className="w-4 h-4 text-slate-400" />
+                                  <a 
+                                    href={`mailto:${arrival.guest_email}`}
+                                    className="flex items-center gap-1.5 hover:text-blue-600 transition-colors"
+                                  >
+                                    <Mail className="w-4 h-4 text-slate-400 hover:text-blue-500" />
                                     {arrival.guest_email}
-                                  </span>
+                                  </a>
                                 )}
                                 <span className="text-slate-400 text-xs">
                                   Signed in {new Date(arrival.signed_in_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
