@@ -567,7 +567,7 @@ export function AdminPanel({
                   <p className="text-xs sm:text-sm mt-2">Add arrivals using the form above</p>
                 </div>
               ) : (
-                <div className="divide-y divide-slate-100 max-h-[500px] sm:max-h-[600px] overflow-y-auto">
+                <div className="divide-y divide-slate-100">
                   {sortedArrivals.map((arrival) => {
                     const isAwaitingId = arrival.signed_in_at && !arrival.id_verified && arrival.status === 'pending' && !arrival.is_flagged;
                     const isIdVerified = arrival.signed_in_at && arrival.id_verified && arrival.status === 'pending' && !arrival.is_flagged;
