@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Upload, Trash2, Edit3, X, Package, Calendar, Users, CheckCircle, Clock, XCircle, Shield, Phone, Mail, AlertCircle, Flag, Ban, FileDown, Download, UserPlus, PenTool } from 'lucide-react';
+import { Plus, Upload, Trash2, Edit3, X, Package, Calendar, Users, CheckCircle, Clock, XCircle, Shield, Phone, Mail, AlertCircle, Flag, Ban, FileDown, Download, UserPlus, PenTool, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase, type Arrival } from '../lib/supabase';
 
 type AdminPanelProps = {
@@ -10,6 +10,11 @@ type AdminPanelProps = {
   onClear: () => void;
   onBulkImport: (text: string) => void;
   onLoadSample: () => void;
+  selectedDate: string;
+  isToday: boolean;
+  onNextDay: () => void;
+  onPreviousDay: () => void;
+  onGoToToday: () => void;
 };
 
 export function AdminPanel({
@@ -19,7 +24,12 @@ export function AdminPanel({
   onRemove,
   onClear,
   onBulkImport,
-  onLoadSample
+  onLoadSample,
+  selectedDate,
+  isToday,
+  onNextDay,
+  onPreviousDay,
+  onGoToToday
 }: AdminPanelProps) {
   const [lastName, setLastName] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -517,10 +527,47 @@ export function AdminPanel({
           <div className="lg:col-span-2 order-1 lg:order-2">
             <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
               <div className="bg-slate-50 px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-200">
-                <h2 className="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
-                  <Users className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600" />
-                  Today's Arrivals ({arrivals.length})
-                </h2>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <h2 className="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <Users className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600" />
+                    {isToday ? "Today's" : new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} Arrivals ({arrivals.length})
+                  </h2>
+                  
+                  {/* Date Navigation */}
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <button
+                      type="button"
+                      onClick={onPreviousDay}
+                      className="p-1.5 sm:p-2 rounded-lg bg-slate-200 hover:bg-slate-300 transition-colors"
+                      title="Previous day"
+                    >
+                      <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600" />
+                    </button>
+                    
+                    {!isToday && (
+                      <button
+                        type="button"
+                        onClick={onGoToToday}
+                        className="px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs sm:text-sm font-medium transition-colors"
+                      >
+                        Today
+                      </button>
+                    )}
+                    
+                    <span className="px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium text-slate-600 bg-slate-100 rounded-lg min-w-[90px] sm:min-w-[100px] text-center">
+                      {new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </span>
+                    
+                    <button
+                      type="button"
+                      onClick={onNextDay}
+                      className="p-1.5 sm:p-2 rounded-lg bg-slate-200 hover:bg-slate-300 transition-colors"
+                      title="Next day"
+                    >
+                      <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600" />
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {arrivals.length === 0 ? (

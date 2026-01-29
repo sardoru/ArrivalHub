@@ -137,6 +137,21 @@ async function sendSlackNotification(guestInfo: {
   }
 }
 
+// Get date string for a specific offset from today
+function getDateString(offsetDays: number = 0): string {
+  const now = new Date();
+  now.setDate(now.getDate() + offsetDays);
+  const options: Intl.DateTimeFormatOptions = {
+    timeZone: APP_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  };
+  const formatted = now.toLocaleDateString('en-US', options);
+  const [month, day, year] = formatted.split('/');
+  return `${year}-${month}-${day}`;
+}
+
 function App() {
   // Check for kiosk mode (Guest Sign-In only, no password required)
   const isKioskMode = new URLSearchParams(window.location.search).get('kiosk') === 'true';
@@ -148,10 +163,33 @@ function App() {
   const [arrivals, setArrivals] = useState<Arrival[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState(() => getLocalDateString());
   
   // Track signed-in arrivals to detect new sign-ins
   const previousSignedInIdsRef = useRef<Set<string>>(new Set());
   const isInitialLoadRef = useRef(true);
+  
+  // Check if selected date is today
+  const isToday = selectedDate === getLocalDateString();
+  
+  // Date navigation handlers
+  const goToNextDay = () => {
+    const current = new Date(selectedDate + 'T12:00:00'); // noon to avoid timezone issues
+    current.setDate(current.getDate() + 1);
+    const newDate = current.toISOString().split('T')[0];
+    setSelectedDate(newDate);
+  };
+  
+  const goToPreviousDay = () => {
+    const current = new Date(selectedDate + 'T12:00:00');
+    current.setDate(current.getDate() - 1);
+    const newDate = current.toISOString().split('T')[0];
+    setSelectedDate(newDate);
+  };
+  
+  const goToToday = () => {
+    setSelectedDate(getLocalDateString());
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('arrivalhub_authenticated');
@@ -163,12 +201,12 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
-  const fetchArrivals = useCallback(async () => {
-    const today = getLocalDateString();
+  const fetchArrivals = useCallback(async (dateToFetch?: string) => {
+    const targetDate = dateToFetch || selectedDate;
     const { data, error } = await supabase
       .from('arrivals')
       .select('*')
-      .eq('arrival_date', today)
+      .eq('arrival_date', targetDate)
       .order('last_name', { ascending: true });
 
     if (error) {
@@ -178,7 +216,7 @@ function App() {
 
     setArrivals(data || []);
     setLoading(false);
-  }, []);
+  }, [selectedDate]);
 
   useEffect(() => {
     fetchArrivals();
@@ -250,10 +288,9 @@ function App() {
   }, [arrivals, isKioskMode, view]);
 
   const addArrival = async (arrival: Omit<Arrival, 'id' | 'created_at' | 'updated_at' | 'arrival_date'>) => {
-    const today = getLocalDateString();
     const { error } = await supabase
       .from('arrivals')
-      .insert([{ ...arrival, arrival_date: today }]);
+      .insert([{ ...arrival, arrival_date: selectedDate }]);
 
     if (error) {
       console.error('Error adding arrival:', error);
@@ -292,11 +329,10 @@ function App() {
   };
 
   const clearAll = async () => {
-    const today = getLocalDateString();
     const { error } = await supabase
       .from('arrivals')
       .delete()
-      .eq('arrival_date', today);
+      .eq('arrival_date', selectedDate);
 
     if (error) {
       console.error('Error clearing arrivals:', error);
@@ -309,7 +345,6 @@ function App() {
   const bulkImport = async (text: string) => {
     const lines = text.split('\n').filter(line => line.trim());
     const newArrivals: Omit<Arrival, 'id' | 'created_at' | 'updated_at'>[] = [];
-    const today = getLocalDateString();
 
     lines.forEach(line => {
       const match = line.match(/^([^,]+),\s*([^-]+)\s*-\s*(\d+)/);
@@ -320,7 +355,7 @@ function App() {
           unit_number: match[3].trim(),
           notes: '',
           status: 'pending',
-          arrival_date: today
+          arrival_date: selectedDate
         });
       }
     });
@@ -340,16 +375,15 @@ function App() {
   };
 
   const loadSample = async () => {
-    const today = getLocalDateString();
     const samples = [
-      { last_name: 'ANDERSON', first_name: 'MICHAEL', unit_number: '1205', notes: 'VIP Guest', status: 'pending' as const, arrival_date: today },
-      { last_name: 'CHEN', first_name: 'SARAH', unit_number: '2301', notes: '', status: 'pending' as const, arrival_date: today },
-      { last_name: 'GARCIA', first_name: 'CARLOS', unit_number: '1847', notes: 'Late arrival 9pm', status: 'pending' as const, arrival_date: today },
-      { last_name: 'JOHNSON', first_name: 'EMMA', unit_number: '3102', notes: '', status: 'pending' as const, arrival_date: today },
-      { last_name: 'KIM', first_name: 'DAVID', unit_number: '2205', notes: 'Wheelchair accessible', status: 'pending' as const, arrival_date: today },
-      { last_name: 'MARTINEZ', first_name: 'ANA', unit_number: '1504', notes: '', status: 'pending' as const, arrival_date: today },
-      { last_name: 'PATEL', first_name: 'RAVI', unit_number: '2708', notes: 'Anniversary trip', status: 'pending' as const, arrival_date: today },
-      { last_name: 'THOMPSON', first_name: 'JENNIFER', unit_number: '1923', notes: '', status: 'pending' as const, arrival_date: today },
+      { last_name: 'ANDERSON', first_name: 'MICHAEL', unit_number: '1205', notes: 'VIP Guest', status: 'pending' as const, arrival_date: selectedDate },
+      { last_name: 'CHEN', first_name: 'SARAH', unit_number: '2301', notes: '', status: 'pending' as const, arrival_date: selectedDate },
+      { last_name: 'GARCIA', first_name: 'CARLOS', unit_number: '1847', notes: 'Late arrival 9pm', status: 'pending' as const, arrival_date: selectedDate },
+      { last_name: 'JOHNSON', first_name: 'EMMA', unit_number: '3102', notes: '', status: 'pending' as const, arrival_date: selectedDate },
+      { last_name: 'KIM', first_name: 'DAVID', unit_number: '2205', notes: 'Wheelchair accessible', status: 'pending' as const, arrival_date: selectedDate },
+      { last_name: 'MARTINEZ', first_name: 'ANA', unit_number: '1504', notes: '', status: 'pending' as const, arrival_date: selectedDate },
+      { last_name: 'PATEL', first_name: 'RAVI', unit_number: '2708', notes: 'Anniversary trip', status: 'pending' as const, arrival_date: selectedDate },
+      { last_name: 'THOMPSON', first_name: 'JENNIFER', unit_number: '1923', notes: '', status: 'pending' as const, arrival_date: selectedDate },
     ];
 
     const { error } = await supabase
@@ -557,6 +591,11 @@ function App() {
           onClear={clearAll}
           onBulkImport={bulkImport}
           onLoadSample={loadSample}
+          selectedDate={selectedDate}
+          isToday={isToday}
+          onNextDay={goToNextDay}
+          onPreviousDay={goToPreviousDay}
+          onGoToToday={goToToday}
         />
       )}
       {view === 'display' && (
