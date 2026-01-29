@@ -26,6 +26,39 @@ function getLocalDateString(): string {
   return `${year}-${month}-${day}`;
 }
 
+// Get the display date for Display View
+// Before 6am CT: show previous day's arrivals (for late check-ins)
+// After 6am CT: show current day's arrivals
+function getDisplayDateString(): string {
+  const now = new Date();
+  
+  // Get current hour in app timezone
+  const hourString = now.toLocaleString('en-US', {
+    timeZone: APP_TIMEZONE,
+    hour: 'numeric',
+    hour12: false,
+  });
+  const currentHour = parseInt(hourString, 10);
+  
+  // If before 6am, use yesterday's date
+  if (currentHour < 6) {
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const options: Intl.DateTimeFormatOptions = {
+      timeZone: APP_TIMEZONE,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    };
+    const formatted = yesterday.toLocaleDateString('en-US', options);
+    const [month, day, year] = formatted.split('/');
+    return `${year}-${month}-${day}`;
+  }
+  
+  // Otherwise use today's date
+  return getLocalDateString();
+}
+
 // Play a notification ping sound using Web Audio API
 function playNotificationSound() {
   try {
@@ -222,17 +255,18 @@ function App() {
     setLoading(false);
   }, [selectedDate]);
 
-  // Fetch today's arrivals (Display View & Guest Sign-In)
+  // Fetch arrivals for Display View
+  // Uses display date logic: before 6am shows previous day, after 6am shows current day
   const fetchTodayArrivals = useCallback(async () => {
-    const today = getLocalDateString();
+    const displayDate = getDisplayDateString();
     const { data, error } = await supabase
       .from('arrivals')
       .select('*')
-      .eq('arrival_date', today)
+      .eq('arrival_date', displayDate)
       .order('last_name', { ascending: true });
 
     if (error) {
-      console.error('Error fetching today arrivals:', error);
+      console.error('Error fetching display arrivals:', error);
       return;
     }
 
