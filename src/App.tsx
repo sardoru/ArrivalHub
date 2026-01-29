@@ -154,7 +154,10 @@ function getDateString(offsetDays: number = 0): string {
 
 function App() {
   // Check for kiosk mode (Guest Sign-In only, no password required)
-  const isKioskMode = new URLSearchParams(window.location.search).get('kiosk') === 'true';
+  const urlParams = new URLSearchParams(window.location.search);
+  const isKioskMode = urlParams.get('kiosk') === 'true';
+  // Staff display mode (Display View only, no password required)
+  const isStaffDisplayMode = urlParams.get('display') === 'true' || urlParams.get('staff') === 'true';
   
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return localStorage.getItem('arrivalhub_authenticated') === 'true';
@@ -529,6 +532,27 @@ function App() {
   // Kiosk mode - Guest Sign-In only, no password required
   if (isKioskMode) {
     return <GuestSignIn onSignIn={signInGuest} />;
+  }
+
+  // Staff display mode - Display View only, no password required
+  if (isStaffDisplayMode) {
+    if (loading) {
+      return (
+        <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-slate-400 font-medium">Loading arrivals...</p>
+          </div>
+        </div>
+      );
+    }
+    return (
+      <DisplayView
+        arrivals={todayArrivals}
+        currentTime={currentTime}
+        onCheckIn={handleCheckIn}
+      />
+    );
   }
 
   // Password gate - must be after all hooks
