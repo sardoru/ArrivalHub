@@ -377,56 +377,60 @@ export function GuestSignIn({ onSignIn }: GuestSignInProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-6">
-      <div className="max-w-2xl w-full">
-        <div className="text-center mb-10">
-          <div className="inline-flex p-5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl shadow-lg shadow-blue-500/30 mb-6">
-            <Building2 className="w-16 h-16 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
+      <div className="max-w-4xl w-full">
+        {/* Compact header for iPad landscape */}
+        <div className="flex items-center justify-center gap-4 mb-4">
+          <div className="inline-flex p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg shadow-blue-500/30">
+            <Building2 className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-white mb-3">Welcome!</h1>
-          <p className="text-xl text-slate-400">Please sign in to check in for your stay</p>
+          <div>
+            <h1 className="text-3xl font-bold text-white">Welcome!</h1>
+            <p className="text-base text-slate-400">Please sign in to check in for your stay</p>
+          </div>
         </div>
 
-        <div className="bg-slate-800/50 rounded-3xl p-8 border border-slate-700/50">
-          <div className="space-y-6">
+        <div className="bg-slate-800/50 rounded-2xl p-5 border border-slate-700/50">
+          {/* 2x2 grid layout for form fields */}
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-slate-300 text-lg font-medium mb-3">
-                <User className="w-5 h-5 inline mr-2" />
+              <label className="block text-slate-300 text-base font-medium mb-2">
+                <User className="w-4 h-4 inline mr-1.5" />
                 First Name
               </label>
               <input
                 type="text"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-                className="w-full bg-slate-700/50 border border-slate-600 rounded-xl px-5 py-4 text-2xl text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                className="w-full bg-slate-700/50 border border-slate-600 rounded-xl px-4 py-3 text-xl text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                 placeholder="Enter your first name"
                 autoComplete="given-name"
               />
             </div>
 
             <div>
-              <label className="block text-slate-300 text-lg font-medium mb-3">
-                <User className="w-5 h-5 inline mr-2" />
+              <label className="block text-slate-300 text-base font-medium mb-2">
+                <User className="w-4 h-4 inline mr-1.5" />
                 Last Name
               </label>
               <input
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
-                className="w-full bg-slate-700/50 border border-slate-600 rounded-xl px-5 py-4 text-2xl text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                className="w-full bg-slate-700/50 border border-slate-600 rounded-xl px-4 py-3 text-xl text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                 placeholder="Enter your last name"
                 autoComplete="family-name"
               />
             </div>
 
             <div>
-              <label className="block text-slate-300 text-lg font-medium mb-3">
-                <Phone className="w-5 h-5 inline mr-2" />
+              <label className="block text-slate-300 text-base font-medium mb-2">
+                <Phone className="w-4 h-4 inline mr-1.5" />
                 Phone Number
                 {isInternationalPhone && (
-                  <span className="ml-2 inline-flex items-center gap-1 text-sm text-blue-400">
-                    <Globe className="w-4 h-4" />
-                    International
+                  <span className="ml-2 inline-flex items-center gap-1 text-xs text-blue-400">
+                    <Globe className="w-3 h-3" />
+                    Int'l
                   </span>
                 )}
               </label>
@@ -439,25 +443,22 @@ export function GuestSignIn({ onSignIn }: GuestSignInProps) {
                   setPhone(formatted);
                   setIsInternationalPhone(isInternational);
                 }}
-                className="w-full bg-slate-700/50 border border-slate-600 rounded-xl px-5 py-4 text-2xl text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                className="w-full bg-slate-700/50 border border-slate-600 rounded-xl px-4 py-3 text-xl text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                 placeholder="(555) 123-4567"
                 autoComplete="tel"
               />
-              <p className="text-slate-500 text-sm mt-2">
-                For international numbers, start with + (e.g., +44 20 7123 4567)
-              </p>
             </div>
 
             <div>
-              <label className="block text-slate-300 text-lg font-medium mb-3">
-                <Mail className="w-5 h-5 inline mr-2" />
+              <label className="block text-slate-300 text-base font-medium mb-2">
+                <Mail className="w-4 h-4 inline mr-1.5" />
                 Email Address
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-slate-700/50 border border-slate-600 rounded-xl px-5 py-4 text-2xl text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                className="w-full bg-slate-700/50 border border-slate-600 rounded-xl px-4 py-3 text-xl text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                 placeholder="your@email.com"
                 autoComplete="email"
               />
@@ -465,23 +466,23 @@ export function GuestSignIn({ onSignIn }: GuestSignInProps) {
           </div>
 
           {error && (
-            <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-4 mt-6">
-              <p className="text-red-300 text-lg">{error}</p>
+            <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-3 mt-4">
+              <p className="text-red-300 text-base">{error}</p>
             </div>
           )}
 
           <button
             onClick={handleInfoSubmit}
-            className="w-full mt-8 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-5 rounded-2xl text-2xl font-bold hover:from-blue-700 hover:to-blue-800 transition-all flex items-center justify-center gap-3 shadow-lg shadow-blue-500/25"
+            className="w-full mt-5 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 rounded-xl text-xl font-bold hover:from-blue-700 hover:to-blue-800 transition-all flex items-center justify-center gap-3 shadow-lg shadow-blue-500/25"
           >
             Continue
-            <ArrowRight className="w-7 h-7" />
+            <ArrowRight className="w-6 h-6" />
           </button>
         </div>
 
-        <div className="flex justify-center mt-8 gap-3">
-          <div className={`w-3 h-3 rounded-full transition-all ${step === 'info' ? 'bg-blue-500 w-8' : 'bg-slate-600'}`}></div>
-          <div className={`w-3 h-3 rounded-full transition-all ${step === 'rules' ? 'bg-blue-500 w-8' : 'bg-slate-600'}`}></div>
+        <div className="flex justify-center mt-4 gap-3">
+          <div className={`w-2.5 h-2.5 rounded-full transition-all ${step === 'info' ? 'bg-blue-500 w-6' : 'bg-slate-600'}`}></div>
+          <div className={`w-2.5 h-2.5 rounded-full transition-all ${step === 'rules' ? 'bg-blue-500 w-6' : 'bg-slate-600'}`}></div>
         </div>
       </div>
     </div>

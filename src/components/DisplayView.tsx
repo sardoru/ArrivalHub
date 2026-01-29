@@ -189,10 +189,10 @@ export function DisplayView({ arrivals, currentTime, onCheckIn }: DisplayViewPro
                     key={arrival.id}
                     className={`rounded-xl sm:rounded-2xl px-4 sm:px-6 ${size.row} transition-all group backdrop-blur-sm ${
                       isWalkIn
-                        ? 'bg-gradient-to-r from-purple-600/30 to-purple-500/20 border-2 border-purple-500 animate-pulse shadow-lg shadow-purple-500/20'
+                        ? 'bg-gradient-to-r from-purple-600/40 to-purple-500/30 border-2 border-purple-500 animate-pulse shadow-lg shadow-purple-500/20'
                         : isJustArrived
-                        ? 'bg-gradient-to-r from-orange-600/30 to-orange-500/20 border-2 border-orange-500 animate-pulse shadow-lg shadow-orange-500/20'
-                        : 'bg-gradient-to-r from-slate-800/80 to-slate-800/40 border border-slate-700/50 hover:border-amber-500/30 hover:bg-slate-700/50'
+                        ? 'bg-gradient-to-r from-orange-600/40 to-orange-500/30 border-2 border-orange-500 animate-pulse shadow-lg shadow-orange-500/20'
+                        : 'bg-slate-700/60 border border-slate-600/50 hover:border-amber-500/30 hover:bg-slate-600/60'
                     }`}
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
