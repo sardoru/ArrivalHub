@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Clock, CheckCircle, Check, Sparkles, Building2, Wifi, UserCheck, AlertCircle, UserPlus } from 'lucide-react';
+import { Clock, CheckCircle, Check, Sparkles, Building2, Wifi, UserCheck, AlertCircle, UserPlus, Minus, Plus, Type } from 'lucide-react';
 import type { Arrival } from '../lib/supabase';
 
 type DisplayViewProps = {
@@ -9,7 +9,7 @@ type DisplayViewProps = {
 };
 
 export function DisplayView({ arrivals, currentTime, onCheckIn }: DisplayViewProps) {
-  const [fontSize, setFontSize] = useState<'medium' | 'large' | 'xlarge'>('large');
+  const [fontSizeLevel, setFontSizeLevel] = useState(2); // 0-4, default 2 (middle)
 
   const pendingArrivals = arrivals.filter(a => a.status === 'pending' && !a.is_flagged);
   const checkedInCount = arrivals.filter(a => a.status === 'checked-in').length;
@@ -41,12 +41,17 @@ export function DisplayView({ arrivals, currentTime, onCheckIn }: DisplayViewPro
     });
   }, [pendingArrivals]);
 
-  const sizes = {
-    medium: { name: 'text-xl', unit: 'text-lg', row: 'py-3' },
-    large: { name: 'text-2xl', unit: 'text-xl', row: 'py-4' },
-    xlarge: { name: 'text-3xl', unit: 'text-2xl', row: 'py-5' }
-  };
-  const size = sizes[fontSize];
+  const sizes = [
+    { name: 'text-lg', unit: 'text-base', row: 'py-2.5' },    // Level 0 - smallest
+    { name: 'text-xl', unit: 'text-lg', row: 'py-3' },        // Level 1
+    { name: 'text-2xl', unit: 'text-xl', row: 'py-4' },       // Level 2 - default
+    { name: 'text-3xl', unit: 'text-2xl', row: 'py-5' },      // Level 3
+    { name: 'text-4xl', unit: 'text-3xl', row: 'py-6' },      // Level 4 - largest
+  ];
+  const size = sizes[fontSizeLevel];
+  
+  const decreaseFontSize = () => setFontSizeLevel(prev => Math.max(0, prev - 1));
+  const increaseFontSize = () => setFontSizeLevel(prev => Math.min(4, prev + 1));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white flex flex-col">
@@ -132,20 +137,33 @@ export function DisplayView({ arrivals, currentTime, onCheckIn }: DisplayViewPro
             </div>
           </div>
 
-          <div className="flex bg-slate-700/50 rounded-lg sm:rounded-xl overflow-hidden p-1">
-            {(['medium', 'large', 'xlarge'] as const).map((s) => (
-              <button
-                key={s}
-                onClick={() => setFontSize(s)}
-                className={`px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base font-semibold rounded-md sm:rounded-lg transition-all ${
-                  fontSize === s
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-600/50'
-                }`}
-              >
-                {s === 'medium' ? 'A' : s === 'large' ? 'A+' : 'A++'}
-              </button>
-            ))}
+          <div className="flex items-center bg-slate-700/50 rounded-lg sm:rounded-xl overflow-hidden">
+            <button
+              onClick={decreaseFontSize}
+              disabled={fontSizeLevel === 0}
+              className={`px-3 sm:px-4 py-2 sm:py-2.5 transition-all ${
+                fontSizeLevel === 0
+                  ? 'text-slate-600 cursor-not-allowed'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-600/50'
+              }`}
+            >
+              <Minus className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
+            <div className="px-3 sm:px-4 py-2 sm:py-2.5 text-white font-semibold flex items-center gap-1.5">
+              <Type className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="text-xs sm:text-sm text-slate-400">{fontSizeLevel + 1}/5</span>
+            </div>
+            <button
+              onClick={increaseFontSize}
+              disabled={fontSizeLevel === 4}
+              className={`px-3 sm:px-4 py-2 sm:py-2.5 transition-all ${
+                fontSizeLevel === 4
+                  ? 'text-slate-600 cursor-not-allowed'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-600/50'
+              }`}
+            >
+              <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
           </div>
         </div>
       </div>
