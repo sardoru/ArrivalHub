@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Upload, Trash2, Edit3, X, Package, Calendar, Users, CheckCircle, Clock, XCircle, Shield, Phone, Mail, AlertCircle, Flag, Ban, FileDown, Download, UserPlus, PenTool, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Upload, Trash2, Edit3, X, Calendar, Users, CheckCircle, Clock, XCircle, Shield, Phone, Mail, AlertCircle, Flag, Ban, FileDown, Download, UserPlus, PenTool, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase, type Arrival } from '../lib/supabase';
 
 type AdminPanelProps = {
@@ -9,7 +9,6 @@ type AdminPanelProps = {
   onRemove: (id: string) => void;
   onClear: () => void;
   onBulkImport: (text: string) => void;
-  onLoadSample: () => void;
   selectedDate: string;
   isToday: boolean;
   onNextDay: () => void;
@@ -24,7 +23,6 @@ export function AdminPanel({
   onRemove,
   onClear,
   onBulkImport,
-  onLoadSample,
   selectedDate,
   isToday,
   onNextDay,
@@ -498,14 +496,6 @@ export function AdminPanel({
                 </button>
                 <button
                   type="button"
-                  onClick={onLoadSample}
-                  className="bg-emerald-50 text-emerald-700 py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium hover:bg-emerald-100 transition-all flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-base"
-                >
-                  <Package className="w-4 h-4 sm:w-5 sm:h-5" />
-                  Sample Data
-                </button>
-                <button
-                  type="button"
                   onClick={handleClearAll}
                   className="bg-red-50 text-red-600 py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium hover:bg-red-100 transition-all flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-base"
                 >
@@ -574,7 +564,7 @@ export function AdminPanel({
                 <div className="p-8 sm:p-16 text-center text-slate-400">
                   <Users className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 opacity-30" />
                   <p className="text-base sm:text-lg font-medium">No arrivals yet</p>
-                  <p className="text-xs sm:text-sm mt-2">Add arrivals using the form or tap "Sample Data"</p>
+                  <p className="text-xs sm:text-sm mt-2">Add arrivals using the form above</p>
                 </div>
               ) : (
                 <div className="divide-y divide-slate-100 max-h-[500px] sm:max-h-[600px] overflow-y-auto">

@@ -434,30 +434,6 @@ function App() {
     }
   };
 
-  const loadSample = async () => {
-    const samples = [
-      { last_name: 'ANDERSON', first_name: 'MICHAEL', unit_number: '1205', notes: 'VIP Guest', status: 'pending' as const, arrival_date: selectedDate },
-      { last_name: 'CHEN', first_name: 'SARAH', unit_number: '2301', notes: '', status: 'pending' as const, arrival_date: selectedDate },
-      { last_name: 'GARCIA', first_name: 'CARLOS', unit_number: '1847', notes: 'Late arrival 9pm', status: 'pending' as const, arrival_date: selectedDate },
-      { last_name: 'JOHNSON', first_name: 'EMMA', unit_number: '3102', notes: '', status: 'pending' as const, arrival_date: selectedDate },
-      { last_name: 'KIM', first_name: 'DAVID', unit_number: '2205', notes: 'Wheelchair accessible', status: 'pending' as const, arrival_date: selectedDate },
-      { last_name: 'MARTINEZ', first_name: 'ANA', unit_number: '1504', notes: '', status: 'pending' as const, arrival_date: selectedDate },
-      { last_name: 'PATEL', first_name: 'RAVI', unit_number: '2708', notes: 'Anniversary trip', status: 'pending' as const, arrival_date: selectedDate },
-      { last_name: 'THOMPSON', first_name: 'JENNIFER', unit_number: '1923', notes: '', status: 'pending' as const, arrival_date: selectedDate },
-    ];
-
-    const { error } = await supabase
-      .from('arrivals')
-      .insert(samples);
-
-    if (error) {
-      console.error('Error loading sample data:', error);
-      alert('Failed to load sample data. Please try again.');
-      return;
-    }
-    await fetchArrivals();
-  };
-
   const handleCheckIn = (id: string) => {
     updateArrival(id, { status: 'checked-in' });
   };
@@ -673,7 +649,6 @@ function App() {
           onRemove={removeArrival}
           onClear={clearAll}
           onBulkImport={bulkImport}
-          onLoadSample={loadSample}
           selectedDate={selectedDate}
           isToday={isToday}
           onNextDay={goToNextDay}
