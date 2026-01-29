@@ -160,7 +160,8 @@ function App() {
     return localStorage.getItem('arrivalhub_authenticated') === 'true';
   });
   const [view, setView] = useState<View>('admin');
-  const [arrivals, setArrivals] = useState<Arrival[]>([]);
+  const [arrivals, setArrivals] = useState<Arrival[]>([]); // Admin Panel arrivals (selected date)
+  const [todayArrivals, setTodayArrivals] = useState<Arrival[]>([]); // Display View arrivals (always today)
   const [currentTime, setCurrentTime] = useState(new Date());
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(() => getLocalDateString());
@@ -201,12 +202,12 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
-  const fetchArrivals = useCallback(async (dateToFetch?: string) => {
-    const targetDate = dateToFetch || selectedDate;
+  // Fetch arrivals for the selected date (Admin Panel)
+  const fetchArrivals = useCallback(async () => {
     const { data, error } = await supabase
       .from('arrivals')
       .select('*')
-      .eq('arrival_date', targetDate)
+      .eq('arrival_date', selectedDate)
       .order('last_name', { ascending: true });
 
     if (error) {
@@ -218,8 +219,26 @@ function App() {
     setLoading(false);
   }, [selectedDate]);
 
+  // Fetch today's arrivals (Display View & Guest Sign-In)
+  const fetchTodayArrivals = useCallback(async () => {
+    const today = getLocalDateString();
+    const { data, error } = await supabase
+      .from('arrivals')
+      .select('*')
+      .eq('arrival_date', today)
+      .order('last_name', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching today arrivals:', error);
+      return;
+    }
+
+    setTodayArrivals(data || []);
+  }, []);
+
   useEffect(() => {
     fetchArrivals();
+    fetchTodayArrivals();
 
     const channel = supabase
       .channel('arrivals-changes')
@@ -233,6 +252,7 @@ function App() {
         (payload) => {
           console.log('Realtime update received:', payload);
           fetchArrivals();
+          fetchTodayArrivals();
         }
       )
       .subscribe((status) => {
@@ -242,29 +262,31 @@ function App() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [fetchArrivals]);
+  }, [fetchArrivals, fetchTodayArrivals]);
 
   // Poll for updates as backup (every 5 seconds)
   useEffect(() => {
     const pollInterval = setInterval(() => {
       fetchArrivals();
+      fetchTodayArrivals();
     }, 5000);
 
     return () => clearInterval(pollInterval);
-  }, [fetchArrivals]);
+  }, [fetchArrivals, fetchTodayArrivals]);
 
   // Detect new sign-ins and play notification sound (only on admin/display views)
+  // Uses todayArrivals since sign-ins only happen for today
   useEffect(() => {
     if (isKioskMode || view === 'guest') return;
     
     const currentSignedInIds = new Set(
-      arrivals.filter(a => a.signed_in_at).map(a => a.id)
+      todayArrivals.filter(a => a.signed_in_at).map(a => a.id)
     );
     
     // Skip sound on initial page load
     if (isInitialLoadRef.current) {
       previousSignedInIdsRef.current = currentSignedInIds;
-      if (arrivals.length > 0) {
+      if (todayArrivals.length > 0) {
         isInitialLoadRef.current = false;
       }
       return;
@@ -285,7 +307,7 @@ function App() {
     
     // Update the ref with current signed-in IDs
     previousSignedInIdsRef.current = currentSignedInIds;
-  }, [arrivals, isKioskMode, view]);
+  }, [todayArrivals, isKioskMode, view]);
 
   const addArrival = async (arrival: Omit<Arrival, 'id' | 'created_at' | 'updated_at' | 'arrival_date'>) => {
     const { error } = await supabase
@@ -312,6 +334,7 @@ function App() {
       return;
     }
     await fetchArrivals();
+    await fetchTodayArrivals();
   };
 
   const removeArrival = async (id: string) => {
@@ -456,6 +479,7 @@ function App() {
       });
 
       await fetchArrivals();
+      await fetchTodayArrivals();
       return { 
         success: true, 
         message: `Welcome, ${guestInfo.firstName}! Your unit is ${arrivalToUpdate.unit_number}.` 
@@ -495,6 +519,7 @@ function App() {
     });
 
     await fetchArrivals();
+    await fetchTodayArrivals();
     return { 
       success: true, 
       message: `Thank you, ${guestInfo.firstName}! Please see front desk for unit assignment.` 
@@ -600,7 +625,7 @@ function App() {
       )}
       {view === 'display' && (
         <DisplayView
-          arrivals={arrivals}
+          arrivals={todayArrivals}
           currentTime={currentTime}
           onCheckIn={handleCheckIn}
         />
