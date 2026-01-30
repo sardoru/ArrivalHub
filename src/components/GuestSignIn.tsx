@@ -298,7 +298,7 @@ export function GuestSignIn({ onSignIn }: GuestSignInProps) {
                 </div>
               </div>
 
-              <div className="bg-red-900/30 rounded-lg p-3 border border-red-700/30 col-span-2">
+              <div className="bg-red-900/30 rounded-lg p-3 border border-red-700/30 col-span-3">
                 <div className="flex items-start gap-2">
                   <div className="w-2 h-2 bg-red-500 rounded-full mt-1.5 flex-shrink-0"></div>
                   <div>
