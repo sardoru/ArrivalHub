@@ -288,7 +288,17 @@ export function GuestSignIn({ onSignIn }: GuestSignInProps) {
                 </div>
               </div>
 
-              <div className="bg-red-900/30 rounded-lg p-3 border border-red-700/30 col-span-3">
+              <div className="bg-slate-700/30 rounded-lg p-3 border border-slate-600/30">
+                <div className="flex items-start gap-2">
+                  <div className="w-2 h-2 bg-red-400 rounded-full mt-1.5 flex-shrink-0"></div>
+                  <div>
+                    <p className="text-white text-sm font-medium">No Unauthorized Guests</p>
+                    <p className="text-slate-400 text-xs">Maximum occupancy strictly enforced</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-red-900/30 rounded-lg p-3 border border-red-700/30 col-span-2">
                 <div className="flex items-start gap-2">
                   <div className="w-2 h-2 bg-red-500 rounded-full mt-1.5 flex-shrink-0"></div>
                   <div>
