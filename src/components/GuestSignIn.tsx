@@ -212,161 +212,161 @@ export function GuestSignIn({ onSignIn }: GuestSignInProps) {
 
   if (step === 'rules') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-6">
-        <div className="max-w-3xl w-full">
-          <button
-            onClick={() => setStep('info')}
-            className="text-slate-400 hover:text-white mb-6 flex items-center gap-2 text-lg transition-all"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Back
-          </button>
-
-          <div className="bg-slate-800/50 rounded-3xl p-8 border border-slate-700/50">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="p-4 bg-amber-500/20 rounded-2xl">
-                <Shield className="w-10 h-10 text-amber-400" />
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
+        <div className="max-w-5xl w-full">
+          {/* Compact header with back button */}
+          <div className="flex items-center justify-between mb-3">
+            <button
+              onClick={() => setStep('info')}
+              className="text-slate-400 hover:text-white flex items-center gap-1.5 text-base transition-all"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </button>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-amber-500/20 rounded-xl">
+                <Shield className="w-6 h-6 text-amber-400" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-white">Building Rules</h1>
-                <p className="text-slate-400 text-lg">Please review and accept before continuing</p>
+                <h1 className="text-xl font-bold text-white">Building Rules</h1>
+                <p className="text-slate-400 text-sm">Please review and accept</p>
+              </div>
+            </div>
+            <div className="w-16"></div>
+          </div>
+
+          <div className="bg-slate-800/50 rounded-2xl p-4 border border-slate-700/50">
+            {/* 3-column grid for rules */}
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              <div className="bg-slate-700/30 rounded-lg p-3 border border-slate-600/30">
+                <div className="flex items-start gap-2">
+                  <div className="w-2 h-2 bg-red-400 rounded-full mt-1.5 flex-shrink-0"></div>
+                  <div>
+                    <p className="text-white text-sm font-medium">No Smoking</p>
+                    <p className="text-slate-400 text-xs">$200 Penalty</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-slate-700/30 rounded-lg p-3 border border-slate-600/30">
+                <div className="flex items-start gap-2">
+                  <div className="w-2 h-2 bg-amber-400 rounded-full mt-1.5 flex-shrink-0"></div>
+                  <div>
+                    <p className="text-white text-sm font-medium">No Loud Music After 10pm</p>
+                    <p className="text-slate-400 text-xs">Be respectful</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-slate-700/30 rounded-lg p-3 border border-slate-600/30">
+                <div className="flex items-start gap-2">
+                  <div className="w-2 h-2 bg-red-400 rounded-full mt-1.5 flex-shrink-0"></div>
+                  <div>
+                    <p className="text-white text-sm font-medium">Absolutely No Parties</p>
+                    <p className="text-slate-400 text-xs">Strict enforcement</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-slate-700/30 rounded-lg p-3 border border-slate-600/30">
+                <div className="flex items-start gap-2">
+                  <div className="w-2 h-2 bg-blue-400 rounded-full mt-1.5 flex-shrink-0"></div>
+                  <div>
+                    <p className="text-white text-sm font-medium">Liability Acceptance</p>
+                    <p className="text-slate-400 text-xs">Guest responsibility</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-slate-700/30 rounded-lg p-3 border border-slate-600/30">
+                <div className="flex items-start gap-2">
+                  <div className="w-2 h-2 bg-blue-400 rounded-full mt-1.5 flex-shrink-0"></div>
+                  <div>
+                    <p className="text-white text-sm font-medium">24/7 Recording</p>
+                    <p className="text-slate-400 text-xs">Common areas w/ audio</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-red-900/30 rounded-lg p-3 border border-red-700/30">
+                <div className="flex items-start gap-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                  <div>
+                    <p className="text-white text-sm font-medium">Fire Alarm Policy</p>
+                    <p className="text-red-300 text-xs">$400 false alarm penalty</p>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="space-y-4 mb-8">
-              <div className="bg-slate-700/30 rounded-xl p-5 border border-slate-600/30">
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-red-400 rounded-full mt-2.5 flex-shrink-0"></div>
-                  <div>
-                    <p className="text-white text-xl font-medium">No Smoking</p>
-                    <p className="text-slate-400">$200 Penalty for violations</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-slate-700/30 rounded-xl p-5 border border-slate-600/30">
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-amber-400 rounded-full mt-2.5 flex-shrink-0"></div>
-                  <div>
-                    <p className="text-white text-xl font-medium">No Loud Music After 10pm</p>
-                    <p className="text-slate-400">Please be respectful of other residents</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-slate-700/30 rounded-xl p-5 border border-slate-600/30">
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-red-400 rounded-full mt-2.5 flex-shrink-0"></div>
-                  <div>
-                    <p className="text-white text-xl font-medium">Absolutely No Parties</p>
-                    <p className="text-slate-400">Strict enforcement policy in effect</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-slate-700/30 rounded-xl p-5 border border-slate-600/30">
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full mt-2.5 flex-shrink-0"></div>
-                  <div>
-                    <p className="text-white text-xl font-medium">Liability Acceptance</p>
-                    <p className="text-slate-400">You accept responsibility for your conduct as a guest</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-slate-700/30 rounded-xl p-5 border border-slate-600/30">
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full mt-2.5 flex-shrink-0"></div>
-                  <div>
-                    <p className="text-white text-xl font-medium">24/7 Recording</p>
-                    <p className="text-slate-400">All common areas are recorded with audio</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-red-900/30 rounded-xl p-5 border border-red-700/30">
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-red-500 rounded-full mt-2.5 flex-shrink-0"></div>
-                  <div>
-                    <p className="text-white text-xl font-medium">Fire Alarm Policy</p>
-                    <p className="text-red-300">
-                      In the event of any false or unwarranted fire alarm activation caused directly 
-                      or indirectly by the Guest, a non-refundable penalty of <strong>$400.00</strong> will 
-                      be assessed for each occurrence.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <label className="flex items-center gap-4 p-5 bg-slate-700/50 rounded-xl cursor-pointer hover:bg-slate-700/70 transition-all mb-6">
-              <input
-                type="checkbox"
-                checked={rulesAccepted}
-                onChange={(e) => setRulesAccepted(e.target.checked)}
-                className="w-7 h-7 rounded-lg border-2 border-slate-500 bg-slate-800 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-0 cursor-pointer"
-              />
-              <span className="text-white text-xl font-medium">
-                I have read and accept all building rules
-              </span>
-            </label>
-
-            {/* Signature Pad */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-3">
-                <label className="text-slate-300 text-lg font-medium flex items-center gap-2">
-                  <PenTool className="w-5 h-5" />
-                  Your Signature
-                </label>
-                <button
-                  type="button"
-                  onClick={clearSignature}
-                  className="text-slate-400 hover:text-white text-sm flex items-center gap-1 transition-colors"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  Clear
-                </button>
-              </div>
-              <div className={`relative rounded-xl overflow-hidden border-2 ${hasSignature ? 'border-emerald-500' : 'border-slate-600'} transition-colors`}>
-                <canvas
-                  ref={canvasRef}
-                  className="w-full h-32 sm:h-40 bg-slate-800 touch-none"
-                  style={{ touchAction: 'none' }}
+            {/* Checkbox and Signature side by side */}
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <label className="flex items-center gap-3 p-3 bg-slate-700/50 rounded-xl cursor-pointer hover:bg-slate-700/70 transition-all">
+                <input
+                  type="checkbox"
+                  checked={rulesAccepted}
+                  onChange={(e) => setRulesAccepted(e.target.checked)}
+                  className="w-6 h-6 rounded-lg border-2 border-slate-500 bg-slate-800 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-0 cursor-pointer"
                 />
-                {!hasSignature && (
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <p className="text-slate-500 text-lg">Sign here with your finger</p>
-                  </div>
-                )}
+                <span className="text-white text-base font-medium">
+                  I accept all building rules
+                </span>
+              </label>
+
+              {/* Signature Pad */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-slate-300 text-sm font-medium flex items-center gap-1.5">
+                    <PenTool className="w-4 h-4" />
+                    Your Signature
+                    {hasSignature && (
+                      <CheckCircle className="w-4 h-4 text-emerald-400" />
+                    )}
+                  </label>
+                  <button
+                    type="button"
+                    onClick={clearSignature}
+                    className="text-slate-400 hover:text-white text-xs flex items-center gap-1 transition-colors"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    Clear
+                  </button>
+                </div>
+                <div className={`relative rounded-lg overflow-hidden border-2 ${hasSignature ? 'border-emerald-500' : 'border-slate-600'} transition-colors`}>
+                  <canvas
+                    ref={canvasRef}
+                    className="w-full h-20 bg-slate-800 touch-none"
+                    style={{ touchAction: 'none' }}
+                  />
+                  {!hasSignature && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <p className="text-slate-500 text-sm">Sign here</p>
+                    </div>
+                  )}
+                </div>
               </div>
-              {hasSignature && (
-                <p className="text-emerald-400 text-sm mt-2 flex items-center gap-1">
-                  <CheckCircle className="w-4 h-4" />
-                  Signature captured
-                </p>
-              )}
             </div>
 
             {error && (
-              <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-4 mb-6">
-                <p className="text-red-300 text-lg">{error}</p>
+              <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 mb-4">
+                <p className="text-red-300 text-sm">{error}</p>
               </div>
             )}
 
             <button
               onClick={handleRulesSubmit}
               disabled={isSubmitting}
-              className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 text-white py-5 rounded-2xl text-2xl font-bold hover:from-emerald-700 hover:to-emerald-800 transition-all flex items-center justify-center gap-3 shadow-lg shadow-emerald-500/25 disabled:opacity-50"
+              className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 text-white py-3 rounded-xl text-lg font-bold hover:from-emerald-700 hover:to-emerald-800 transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>
-                  <div className="w-7 h-7 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   Signing In...
                 </>
               ) : (
                 <>
                   Complete Sign-In
-                  <CheckCircle className="w-7 h-7" />
+                  <CheckCircle className="w-5 h-5" />
                 </>
               )}
             </button>
